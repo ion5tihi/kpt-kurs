@@ -1,0 +1,711 @@
+// КПТ-Курс — логіка застосунку (vanilla JS, hash-роутинг)
+
+let S = Store.load();
+const $app = () => document.getElementById("app");
+const PASS = 0.8; // поріг складання тесту
+
+// ── Утиліти ──────────────────────────────────────────────
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function fmtDate(iso) {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-");
+  return `${d}.${m}.${y}`;
+}
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function save() { Store.save(S); }
+
+function mondayOf(date) {
+  const d = new Date(date);
+  const day = (d.getDay() + 6) % 7; // 0 = понеділок
+  d.setDate(d.getDate() - day);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+function sessionsThisWeek() {
+  const mon = mondayOf(new Date());
+  return S.sessions.filter(s => new Date(s.date + "T12:00") >= mon).length;
+}
+function courseWeek() {
+  if (!S.startDate) return null;
+  const days = Math.floor((new Date() - new Date(S.startDate + "T00:00")) / 86400000);
+  return days < 0 ? null : Math.floor(days / 7) + 1;
+}
+
+// ── Стан блоків ──────────────────────────────────────────
+
+function blockChecklistDone(b) {
+  return b.exit.every((_, i) => S.checklist[`b${b.id}-${i}`]);
+}
+function blockQuizPassed(id) {
+  return (S.quizAttempts[id] || []).some(a => a.passed);
+}
+function blockBestQuiz(id) {
+  const at = S.quizAttempts[id] || [];
+  if (!at.length) return null;
+  return at.reduce((m, a) => (a.score / a.total > m.score / m.total ? a : m));
+}
+function blockDone(id) { return !!S.blockDone[id]; }
+function currentBlock() {
+  return COURSE.blocks.find(b => !blockDone(b.id)) || COURSE.blocks[COURSE.blocks.length - 1];
+}
+function progressPct() {
+  const done = COURSE.blocks.filter(b => blockDone(b.id)).length;
+  return Math.round(done / COURSE.blocks.length * 100);
+}
+
+// ── MITI ─────────────────────────────────────────────────
+
+function mitiEval(m) {
+  if (!m) return null;
+  const refl = (m.simple || 0) + (m.complex || 0);
+  const ratio = m.questions > 0 ? refl / m.questions : (refl > 0 ? Infinity : 0);
+  const pctComplex = refl > 0 ? (m.complex || 0) / refl : 0;
+  return {
+    ratio, pctComplex, incons: m.incons || 0,
+    ratioOk: ratio >= 1,
+    complexOk: pctComplex >= 0.4,
+    inconsOk: (m.incons || 0) === 0,
+  };
+}
+
+// ── Рендеринг ────────────────────────────────────────────
+
+function nav(active) {
+  const items = [
+    ["#/", "🏠", "Головна"],
+    ["#/blocks", "📚", "Курс"],
+    ["#/journal", "📓", "Журнал"],
+    ["#/stats", "📈", "Динаміка"],
+    ["#/settings", "⚙️", "Ще"],
+  ];
+  return `<nav class="tabbar">${items.map(([h, ic, t]) =>
+    `<a href="${h}" class="${active === h ? "active" : ""}"><span class="ic">${ic}</span><span>${t}</span></a>`).join("")}</nav>`;
+}
+
+function header(title, back) {
+  return `<header class="top">${back ? `<a class="back" href="${back}">‹</a>` : ""}<h1>${esc(title)}</h1></header>`;
+}
+
+// ── Головна ──────────────────────────────────────────────
+
+function viewDashboard() {
+  const cur = currentBlock();
+  const week = courseWeek();
+  const sw = sessionsThisWeek();
+  const allDone = COURSE.blocks.every(b => blockDone(b.id));
+  const best = blockBestQuiz(cur.id);
+  return `
+  ${header("КПТ-Курс — наркологія")}
+  <main>
+    <section class="card hero">
+      <div class="progress-row">
+        <div class="progress-bar"><div style="width:${progressPct()}%"></div></div>
+        <span class="progress-num">${progressPct()}%</span>
+      </div>
+      <p class="muted small">${week ? `Тиждень ${week} · ` : ""}${COURSE.blocks.filter(b => blockDone(b.id)).length} з ${COURSE.blocks.length} блоків закрито</p>
+    </section>
+
+    ${allDone ? `
+    <section class="card done-card">
+      <h2>🎓 Курс пройдено!</h2>
+      <p>Критерій завершення: CTS-R ≥36 у двох сесіях поспіль, нуль червоних прапорців, MITI-пороги утримані.</p>
+      <p class="muted small">${esc(COURSE.limits)}</p>
+    </section>` : `
+    <section class="card">
+      <p class="overline">Поточний блок</p>
+      <h2>Блок ${cur.id} — ${esc(cur.title)}</h2>
+      <p class="muted">${esc(cur.weeks)}</p>
+      ${best ? `<p class="small">Тест: ${best.score}/${best.total}${blockQuizPassed(cur.id) ? " ✅" : ""}</p>` : ""}
+      <div class="btn-row">
+        <a class="btn primary" href="#/block/${cur.id}">Відкрити блок</a>
+        <a class="btn" href="#/quiz/${cur.id}">Тест</a>
+      </div>
+    </section>`}
+
+    <section class="card">
+      <p class="overline">Практика цього тижня</p>
+      <div class="week-sessions">
+        <span class="big-num ${sw >= 2 ? "ok" : ""}">${sw} / 2</span>
+        <span class="muted small">сесій у тренажері<br>(мінімум курсу — 2 на тиждень)</span>
+      </div>
+      <a class="btn primary wide" href="#/journal/new">+ Запис у журнал</a>
+    </section>
+
+    ${Object.keys(S.quizWrong).length ? `
+    <section class="card">
+      <p class="overline">Повторення</p>
+      <p class="small">Питань з помилками: <b>${Object.keys(S.quizWrong).length}</b></p>
+      <a class="btn wide" href="#/review">Повторити помилки</a>
+    </section>` : ""}
+
+    <details class="card details">
+      <summary>Правила практики на весь курс</summary>
+      <ol class="rules">${COURSE.rules.map(r => `<li>${esc(r)}</li>`).join("")}</ol>
+      <p class="small muted"><b>Формула модуля:</b> ${esc(COURSE.formula)}</p>
+    </details>
+
+    <details class="card details">
+      <summary>Мета курсу</summary>
+      <p class="small">${esc(COURSE.goal)}</p>
+      <p class="small muted">${esc(COURSE.duration)}</p>
+    </details>
+  </main>
+  ${nav("#/")}`;
+}
+
+// ── Список блоків ────────────────────────────────────────
+
+function viewBlocks() {
+  return `
+  ${header("Курс")}
+  <main>
+    ${COURSE.blocks.map(b => {
+      const done = blockDone(b.id);
+      const cur = currentBlock().id === b.id && !done;
+      const quiz = blockQuizPassed(b.id);
+      const check = blockChecklistDone(b);
+      return `<a class="card block-card ${done ? "b-done" : ""} ${cur ? "b-cur" : ""}" href="#/block/${b.id}">
+        <div class="block-num">${done ? "✅" : b.id}</div>
+        <div class="block-info">
+          <h3>${esc(b.title)}</h3>
+          <p class="muted small">${esc(b.weeks)}</p>
+          <p class="small badges">
+            ${b.exit.length ? `<span class="badge ${check ? "ok" : ""}">чеклист ${b.exit.filter((_, i) => S.checklist[`b${b.id}-${i}`]).length}/${b.exit.length}</span>` : ""}
+            <span class="badge ${quiz ? "ok" : ""}">тест ${quiz ? "складено" : "—"}</span>
+          </p>
+        </div>
+        <span class="chev">›</span>
+      </a>`;
+    }).join("")}
+    <details class="card details">
+      <summary>📖 Бібліотека курсу</summary>
+      <p class="overline">Хребет</p>
+      <ul class="small">${COURSE.library.core.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+      <p class="overline">Наркологія</p>
+      <ul class="small">${COURSE.library.addiction.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+      <p class="overline">Відео</p>
+      <p class="small">${esc(COURSE.library.video)}</p>
+    </details>
+  </main>
+  ${nav("#/blocks")}`;
+}
+
+// ── Блок ─────────────────────────────────────────────────
+
+function viewBlock(id) {
+  const b = COURSE.blocks.find(x => x.id === id);
+  if (!b) { location.hash = "#/blocks"; return ""; }
+  const done = blockDone(id);
+  const quizPassed = blockQuizPassed(id);
+  const checkDone = blockChecklistDone(b);
+  const best = blockBestQuiz(id);
+  const qCount = QUIZ.filter(q => q.block === id).length;
+  return `
+  ${header(`Блок ${b.id} — ${b.title}`, "#/blocks")}
+  <main>
+    <section class="card">
+      <p class="muted">${esc(b.weeks)}${done ? " · ✅ закрито" : ""}</p>
+      ${b.ctsr.length ? `<p class="overline">Цільові пункти CTS-R</p>
+      <p class="badges">${b.ctsr.map(k => `<span class="badge accent">${esc(CTSR_ITEMS[k])}</span>`).join("")}</p>` : ""}
+    </section>
+
+    <section class="card"><p class="overline">Теорія</p><p class="small">${esc(b.theory)}</p></section>
+    <section class="card"><p class="overline">Дриль</p><p class="small">${esc(b.drill)}</p></section>
+    ${b.trap ? `<section class="card trap"><p class="overline">⚠️ Пастка блоку</p><p class="small">${esc(b.trap)}</p></section>` : ""}
+
+    <section class="card">
+      <p class="overline">Критерій виходу</p>
+      ${b.exit.map((e, i) => {
+        const k = `b${b.id}-${i}`;
+        return `<label class="check-row"><input type="checkbox" data-check="${k}" ${S.checklist[k] ? "checked" : ""}><span>${esc(e)}</span></label>`;
+      }).join("")}
+    </section>
+
+    <section class="card">
+      <p class="overline">Оцінка знань</p>
+      <p class="small">${qCount} питань · складено від ${Math.round(PASS * 100)}%${best ? ` · найкращий результат: <b>${best.score}/${best.total}</b>${quizPassed ? " ✅" : ""}` : ""}</p>
+      <a class="btn primary wide" href="#/quiz/${id}">${best ? "Пройти ще раз" : "Пройти тест"}</a>
+    </section>
+
+    <section class="card">
+      ${done
+        ? `<button class="btn wide" data-reopen="${id}">Відкрити блок знову</button>`
+        : `<button class="btn ${checkDone && quizPassed ? "primary" : ""} wide" data-close="${id}">Закрити блок</button>
+           ${checkDone && quizPassed ? "" : `<p class="small muted center">Рекомендація: спершу чеклист і тест. Закрити можна і так — темп вільний.</p>`}`}
+    </section>
+  </main>
+  ${nav("#/blocks")}`;
+}
+
+// ── Тест ─────────────────────────────────────────────────
+
+let quizState = null; // { blockId|null(review), questions, i, correct, wrongIds, answered }
+
+function startQuiz(blockId) {
+  const qs = shuffle(QUIZ.filter(q => q.block === blockId));
+  quizState = { blockId, questions: qs, i: 0, correct: 0, wrongIds: [], answered: false };
+}
+function startReview() {
+  const ids = Object.keys(S.quizWrong);
+  const qs = shuffle(QUIZ.filter(q => ids.includes(q.id)));
+  quizState = { blockId: null, questions: qs, i: 0, correct: 0, wrongIds: [], answered: false };
+}
+
+function viewQuiz() {
+  const qz = quizState;
+  if (!qz || !qz.questions.length) { location.hash = "#/blocks"; return ""; }
+  if (qz.i >= qz.questions.length) return viewQuizResult();
+  const q = qz.questions[qz.i];
+  if (!qz.shuffled || qz.shuffledFor !== qz.i) {
+    qz.shuffled = shuffle(q.options.map((text, idx) => ({ text, idx })));
+    qz.shuffledFor = qz.i;
+  }
+  const title = qz.blockId === null ? "Повторення" : `Тест — Блок ${qz.blockId}`;
+  return `
+  ${header(title, qz.blockId === null ? "#/" : `#/block/${qz.blockId}`)}
+  <main>
+    <p class="muted small center">Питання ${qz.i + 1} з ${qz.questions.length}</p>
+    <div class="progress-bar slim"><div style="width:${Math.round(qz.i / qz.questions.length * 100)}%"></div></div>
+    <section class="card">
+      <p class="q-text">${esc(q.q)}</p>
+      <div class="options">
+      ${qz.shuffled.map(o => {
+        let cls = "";
+        if (qz.answered) {
+          if (o.idx === q.correct) cls = "right";
+          else if (o.idx === qz.picked) cls = "wrong";
+          else cls = "dim";
+        }
+        return `<button class="opt ${cls}" data-opt="${o.idx}" ${qz.answered ? "disabled" : ""}>${esc(o.text)}</button>`;
+      }).join("")}
+      </div>
+      ${qz.answered ? `
+        <div class="expl ${qz.picked === q.correct ? "expl-ok" : "expl-no"}">
+          <b>${qz.picked === q.correct ? "Правильно ✅" : "Неправильно"}</b>
+          <p class="small">${esc(q.expl)}</p>
+        </div>
+        <button class="btn primary wide" data-next>Далі</button>` : ""}
+    </section>
+  </main>`;
+}
+
+function viewQuizResult() {
+  const qz = quizState;
+  const total = qz.questions.length;
+  const pct = qz.correct / total;
+  const passed = pct >= PASS;
+  if (!qz.saved) {
+    qz.saved = true;
+    if (qz.blockId !== null) {
+      (S.quizAttempts[qz.blockId] = S.quizAttempts[qz.blockId] || []).push({
+        date: todayISO(), score: qz.correct, total, passed,
+      });
+    }
+    // облік помилок / повторення
+    qz.wrongIds.forEach(id => { S.quizWrong[id] = (S.quizWrong[id] || 0) + 1; });
+    if (qz.blockId === null) {
+      // у режимі повторення правильні відповіді знімають питання зі списку
+      qz.questions.forEach(q => {
+        if (!qz.wrongIds.includes(q.id)) delete S.quizWrong[q.id];
+      });
+    }
+    save();
+  }
+  return `
+  ${header("Результат", qz.blockId === null ? "#/" : `#/block/${qz.blockId}`)}
+  <main>
+    <section class="card center">
+      <p class="big-num ${passed ? "ok" : ""}">${qz.correct} / ${total}</p>
+      <p>${Math.round(pct * 100)}%</p>
+      ${qz.blockId !== null
+        ? (passed
+          ? `<p class="pass-msg ok">Тест складено ✅</p>`
+          : `<p class="pass-msg">Для складання потрібно ≥${Math.round(PASS * 100)}%. Питання з помилками потраплять у «Повторення».</p>`)
+        : `<p class="pass-msg">${qz.wrongIds.length ? "Питання з помилками залишаються в повторенні." : "Усі помилки опрацьовано ✅"}</p>`}
+      <div class="btn-row">
+        <button class="btn" data-retry>Ще раз</button>
+        <a class="btn primary" href="${qz.blockId === null ? "#/" : `#/block/${qz.blockId}`}">Готово</a>
+      </div>
+    </section>
+  </main>`;
+}
+
+// ── Журнал ───────────────────────────────────────────────
+
+function viewJournal() {
+  const list = S.sessions.slice().sort((a, b) => b.date.localeCompare(a.date) || (b.id - a.id));
+  return `
+  ${header("Журнал сесій")}
+  <main>
+    <a class="btn primary wide" href="#/journal/new">+ Нова сесія</a>
+    <p class="muted small">${esc(COURSE.journal.hint)}</p>
+    ${list.length ? list.map(s => {
+      const b = COURSE.blocks.find(x => x.id === s.block);
+      const m = mitiEval(s.miti);
+      return `<section class="card session">
+        <div class="session-head">
+          <b>${fmtDate(s.date)}</b>
+          <span class="badge accent">Блок ${s.block}${b ? " · " + esc(b.title) : ""}</span>
+        </div>
+        ${s.patient ? `<p class="small"><b>Пацієнт:</b> ${esc(s.patient)}</p>` : ""}
+        ${s.focus ? `<p class="small"><b>Фокус:</b> ${esc(s.focus)}</p>` : ""}
+        ${Object.keys(s.scores || {}).length ? `<p class="small badges">${Object.entries(s.scores).map(([k, v]) =>
+          `<span class="badge ${v >= 3 ? "ok" : ""}">${esc(CTSR_ITEMS[k] || k)}: ${v}</span>`).join("")}</p>` : ""}
+        ${m ? `<p class="small badges">
+          <span class="badge ${m.ratioOk ? "ok" : "no"}">Р:П ${m.ratio === Infinity ? "∞" : m.ratio.toFixed(1)}</span>
+          <span class="badge ${m.complexOk ? "ok" : "no"}">складні ${Math.round(m.pctComplex * 100)}%</span>
+          <span class="badge ${m.inconsOk ? "ok" : "no"}">MI-неузг. ${m.incons}</span></p>` : ""}
+        ${s.narco ? `<p class="small badges">
+          <span class="badge ${s.narco.craving ? "ok" : ""}">крейвінг/тригери: ${s.narco.craving ? "було" : "не було"}</span>
+          <span class="badge ${s.narco.relapse ? "ok" : ""}">профілактика рецидиву: ${s.narco.relapse ? "було" : "не було"}</span></p>` : ""}
+        ${s.redFlag ? `<p class="small badges"><span class="badge no">🚩 червоний прапорець</span></p>` : ""}
+        ${s.note ? `<p class="small note">💡 ${esc(s.note)}</p>` : ""}
+        <button class="link-btn" data-del-session="${s.id}">Видалити</button>
+      </section>`;
+    }).join("") : `<section class="card center muted"><p>Поки що порожньо.<br>Після першої сесії в тренажері — додайте запис.</p></section>`}
+  </main>
+  ${nav("#/journal")}`;
+}
+
+function viewJournalNew() {
+  const cur = currentBlock();
+  return `
+  ${header("Нова сесія", "#/journal")}
+  <main>
+    <form id="session-form" class="card form">
+      <label>Дата <input type="date" name="date" value="${todayISO()}" required></label>
+      <label>Пацієнт (діагноз / етап / налаштування)
+        <input type="text" name="patient" placeholder="напр.: алкогольна залежність, амбівалентний, опір"></label>
+      <label>Фокус сесії
+        <input type="text" name="focus" placeholder="напр.: OARS — тільки відкриті питання і рефлексії"></label>
+      <label>Блок
+        <select name="block" id="block-select">
+          ${COURSE.blocks.map(b => `<option value="${b.id}" ${b.id === cur.id ? "selected" : ""}>Блок ${b.id} — ${esc(b.title)}</option>`).join("")}
+        </select></label>
+      <div id="score-fields"></div>
+      <label>Одна річ, яку наступного разу зроблю інакше
+        <textarea name="note" rows="2"></textarea></label>
+      <label class="check-row"><input type="checkbox" name="redFlag"><span>🚩 Червоний прапорець (пропущений скринінг безпеки)</span></label>
+      <button class="btn primary wide" type="submit">Зберегти</button>
+    </form>
+  </main>`;
+}
+
+function scoreFieldsHTML(blockId) {
+  const b = COURSE.blocks.find(x => x.id === blockId);
+  if (!b) return "";
+  let html = "";
+  if (b.ctsr.length) {
+    html += `<p class="overline">Бали цільових пунктів CTS-R (0–6)</p>` + b.ctsr.map(k => `
+      <label class="score-row">${esc(CTSR_ITEMS[k])}
+        <select name="score-${k}"><option value="">—</option>${[0, 1, 2, 3, 4, 5, 6].map(v => `<option value="${v}">${v}</option>`).join("")}</select>
+      </label>`).join("");
+  }
+  if (b.miti) {
+    html += `<p class="overline">MITI-лічильник</p>
+      <div class="miti-grid">
+        <label>Прості рефлексії <input type="number" name="miti-simple" min="0" inputmode="numeric" placeholder="0"></label>
+        <label>Складні рефлексії <input type="number" name="miti-complex" min="0" inputmode="numeric" placeholder="0"></label>
+        <label>Питання <input type="number" name="miti-questions" min="0" inputmode="numeric" placeholder="0"></label>
+        <label>MI-неузгоджені <input type="number" name="miti-incons" min="0" inputmode="numeric" placeholder="0"></label>
+      </div>
+      <p class="small muted">Пороги: рефлексії:питання ≥1:1 · складні ≥40% · неузгоджені = 0</p>`;
+  }
+  if (b.narco) {
+    html += `<p class="overline">Наркологічна специфіка</p>
+      <label class="check-row"><input type="checkbox" name="narco-craving"><span>Крейвінг / тригери — було</span></label>
+      <label class="check-row"><input type="checkbox" name="narco-relapse"><span>Профілактика рецидиву — було</span></label>`;
+  }
+  return html;
+}
+
+// ── Динаміка ─────────────────────────────────────────────
+
+function sparkline(values) {
+  // values: масив 0..6
+  const w = 260, h = 48, pad = 4;
+  if (values.length === 1) values = [values[0], values[0]];
+  const step = (w - pad * 2) / (values.length - 1);
+  const y = v => h - pad - (v / 6) * (h - pad * 2);
+  const pts = values.map((v, i) => `${pad + i * step},${y(v).toFixed(1)}`).join(" ");
+  return `<svg viewBox="0 0 ${w} ${h}" class="spark" preserveAspectRatio="none">
+    <line x1="${pad}" y1="${y(3)}" x2="${w - pad}" y2="${y(3)}" class="spark-target"/>
+    <polyline points="${pts}" class="spark-line"/>
+    ${values.map((v, i) => `<circle cx="${pad + i * step}" cy="${y(v).toFixed(1)}" r="3" class="spark-dot ${v >= 3 ? "ok" : ""}"/>`).join("")}
+  </svg>`;
+}
+
+function isStalled(vals) {
+  // підказка «пункт не росте»: ≥4 вимірів і останні 2 не вищі за попередні 2
+  if (vals.length < 4) return false;
+  const last2 = Math.max(...vals.slice(-2));
+  const prev2 = Math.max(...vals.slice(-4, -2));
+  return last2 <= prev2 && last2 < 6;
+}
+
+function viewStats() {
+  const ordered = S.sessions.slice().sort((a, b) => a.date.localeCompare(b.date) || (a.id - b.id));
+  const series = {};
+  ordered.forEach(s => Object.entries(s.scores || {}).forEach(([k, v]) => {
+    (series[k] = series[k] || []).push(Number(v));
+  }));
+  const keys = Object.keys(CTSR_ITEMS).filter(k => series[k]);
+  const mitiSessions = ordered.filter(s => s.miti);
+  return `
+  ${header("Динаміка")}
+  <main>
+    ${keys.length ? keys.map(k => {
+      const vals = series[k];
+      const stalled = isStalled(vals);
+      return `<section class="card ${stalled ? "trap" : ""}">
+        <div class="stat-head"><b>${esc(CTSR_ITEMS[k])}</b><span class="muted small">ост.: ${vals[vals.length - 1]} / 6</span></div>
+        ${sparkline(vals)}
+        ${stalled ? `<p class="small">⚠️ Пункт не росте — за правилами курсу він стає фокусом позачергової сесії.</p>` : ""}
+      </section>`;
+    }).join("") : `<section class="card center muted"><p>Дані з'являться після записів у журналі з балами CTS-R.</p></section>`}
+    ${mitiSessions.length ? `<section class="card">
+      <p class="overline">MITI за сесіями</p>
+      ${mitiSessions.slice(-8).map(s => {
+        const m = mitiEval(s.miti);
+        return `<p class="small badges"><span class="muted">${fmtDate(s.date)}</span>
+          <span class="badge ${m.ratioOk ? "ok" : "no"}">Р:П ${m.ratio === Infinity ? "∞" : m.ratio.toFixed(1)}</span>
+          <span class="badge ${m.complexOk ? "ok" : "no"}">${Math.round(m.pctComplex * 100)}%</span>
+          <span class="badge ${m.inconsOk ? "ok" : "no"}">неузг. ${m.incons}</span></p>`;
+      }).join("")}</section>` : ""}
+    <p class="muted small center">${esc(COURSE.journal.monthly)}</p>
+  </main>
+  ${nav("#/stats")}`;
+}
+
+// ── Налаштування ─────────────────────────────────────────
+
+function viewSettings() {
+  return `
+  ${header("Налаштування")}
+  <main>
+    <section class="card form">
+      <label>Дата початку курсу
+        <input type="date" id="start-date" value="${S.startDate || ""}"></label>
+      <p class="small muted">Використовується для лічильника тижнів на головній. Темп курсу вільний.</p>
+    </section>
+    <section class="card">
+      <p class="overline">Дані</p>
+      <button class="btn wide" id="export-json">⬇️ Бекап усіх даних (JSON)</button>
+      <button class="btn wide" id="export-md">⬇️ Журнал у Markdown (для Obsidian)</button>
+      <label class="btn wide file-btn">⬆️ Відновити з бекапу<input type="file" id="import-json" accept=".json,application/json" hidden></label>
+    </section>
+    <section class="card">
+      <p class="overline">Про курс</p>
+      <p class="small">${esc(COURSE.limits)}</p>
+    </section>
+    <section class="card">
+      <button class="btn danger wide" id="reset-all">Скинути всі дані</button>
+    </section>
+    <p class="center muted small">КПТ-Курс · дані зберігаються лише на цьому пристрої</p>
+  </main>
+  ${nav("#/settings")}`;
+}
+
+// ── Експорт ──────────────────────────────────────────────
+
+function download(filename, text, type) {
+  const blob = new Blob([text], { type: type || "text/plain;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+function journalToMarkdown() {
+  const list = S.sessions.slice().sort((a, b) => a.date.localeCompare(b.date) || (a.id - b.id));
+  let md = `# Журнал сесій — КПТ-курс\n\n`;
+  list.forEach(s => {
+    const b = COURSE.blocks.find(x => x.id === s.block);
+    md += `## ${s.date} — Блок ${s.block}${b ? ` (${b.title})` : ""}\n\n`;
+    if (s.patient) md += `- **Пацієнт:** ${s.patient}\n`;
+    if (s.focus) md += `- **Фокус:** ${s.focus}\n`;
+    const sc = Object.entries(s.scores || {});
+    if (sc.length) md += `- **Бали:** ${sc.map(([k, v]) => `${CTSR_ITEMS[k] || k}: ${v}`).join(" · ")}\n`;
+    if (s.miti) {
+      const m = mitiEval(s.miti);
+      md += `- **MITI:** рефлексії:питання ${m.ratio === Infinity ? "∞" : m.ratio.toFixed(1)} · складні ${Math.round(m.pctComplex * 100)}% · неузгоджені ${m.incons}\n`;
+    }
+    if (s.narco) md += `- **Нарко-специфіка:** крейвінг/тригери — ${s.narco.craving ? "було" : "не було"}; профілактика рецидиву — ${s.narco.relapse ? "було" : "не було"}\n`;
+    if (s.redFlag) md += `- 🚩 **Червоний прапорець**\n`;
+    if (s.note) md += `- **Наступного разу інакше:** ${s.note}\n`;
+    md += `\n`;
+  });
+  return md;
+}
+
+// ── Роутер і події ───────────────────────────────────────
+
+function render() {
+  const h = location.hash || "#/";
+  let html;
+  let m;
+  if (h === "#/") html = viewDashboard();
+  else if (h === "#/blocks") html = viewBlocks();
+  else if ((m = h.match(/^#\/block\/(\d+)$/))) html = viewBlock(Number(m[1]));
+  else if ((m = h.match(/^#\/quiz\/(\d+)$/))) {
+    if (!quizState || quizState.blockId !== Number(m[1]) || quizState.saved) startQuiz(Number(m[1]));
+    html = viewQuiz();
+  }
+  else if (h === "#/review") {
+    if (!quizState || quizState.blockId !== null || quizState.saved) startReview();
+    html = viewQuiz();
+  }
+  else if (h === "#/journal") html = viewJournal();
+  else if (h === "#/journal/new") html = viewJournalNew();
+  else if (h === "#/stats") html = viewStats();
+  else if (h === "#/settings") html = viewSettings();
+  else { location.hash = "#/"; return; }
+  $app().innerHTML = html;
+  bindEvents(h);
+  window.scrollTo(0, 0);
+}
+
+function bindEvents(h) {
+  // чеклисти блоку
+  document.querySelectorAll("[data-check]").forEach(el => {
+    el.addEventListener("change", () => {
+      S.checklist[el.dataset.check] = el.checked;
+      if (!el.checked) delete S.checklist[el.dataset.check];
+      save();
+    });
+  });
+  // закриття/відкриття блоку
+  document.querySelectorAll("[data-close]").forEach(el => el.addEventListener("click", () => {
+    const id = Number(el.dataset.close);
+    const b = COURSE.blocks.find(x => x.id === id);
+    if (!(blockChecklistDone(b) && blockQuizPassed(id))) {
+      if (!confirm("Чеклист або тест ще не завершені. Закрити блок все одно?")) return;
+    }
+    S.blockDone[id] = true; save(); render();
+  }));
+  document.querySelectorAll("[data-reopen]").forEach(el => el.addEventListener("click", () => {
+    delete S.blockDone[el.dataset.reopen]; save(); render();
+  }));
+  // тест
+  document.querySelectorAll("[data-opt]").forEach(el => el.addEventListener("click", () => {
+    const qz = quizState;
+    if (qz.answered) return;
+    qz.answered = true;
+    qz.picked = Number(el.dataset.opt);
+    const q = qz.questions[qz.i];
+    if (qz.picked === q.correct) qz.correct++;
+    else qz.wrongIds.push(q.id);
+    $app().innerHTML = viewQuiz();
+    bindEvents(h);
+  }));
+  const next = document.querySelector("[data-next]");
+  if (next) next.addEventListener("click", () => {
+    quizState.i++; quizState.answered = false; quizState.picked = undefined;
+    $app().innerHTML = viewQuiz();
+    bindEvents(h);
+    window.scrollTo(0, 0);
+  });
+  const retry = document.querySelector("[data-retry]");
+  if (retry) retry.addEventListener("click", () => {
+    if (quizState.blockId === null) startReview(); else startQuiz(quizState.blockId);
+    if (!quizState.questions.length) { location.hash = "#/"; return; }
+    $app().innerHTML = viewQuiz();
+    bindEvents(h);
+  });
+  // форма сесії
+  const form = document.getElementById("session-form");
+  if (form) {
+    const blockSel = document.getElementById("block-select");
+    const scoreDiv = document.getElementById("score-fields");
+    const fill = () => { scoreDiv.innerHTML = scoreFieldsHTML(Number(blockSel.value)); };
+    blockSel.addEventListener("change", fill);
+    fill();
+    form.addEventListener("submit", e => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const blockId = Number(fd.get("block"));
+      const b = COURSE.blocks.find(x => x.id === blockId);
+      const scores = {};
+      (b.ctsr || []).forEach(k => {
+        const v = fd.get(`score-${k}`);
+        if (v !== null && v !== "") scores[k] = Number(v);
+      });
+      let miti = null;
+      if (b.miti) {
+        const num = n => Number(fd.get(n) || 0);
+        miti = { simple: num("miti-simple"), complex: num("miti-complex"), questions: num("miti-questions"), incons: num("miti-incons") };
+        if (!miti.simple && !miti.complex && !miti.questions && !miti.incons) miti = null;
+      }
+      const narco = b.narco ? { craving: !!fd.get("narco-craving"), relapse: !!fd.get("narco-relapse") } : null;
+      S.sessions.push({
+        id: Date.now(),
+        date: fd.get("date"),
+        patient: fd.get("patient").trim(),
+        focus: fd.get("focus").trim(),
+        block: blockId,
+        scores, miti, narco,
+        redFlag: !!fd.get("redFlag"),
+        note: fd.get("note").trim(),
+      });
+      save();
+      location.hash = "#/journal";
+    });
+  }
+  // видалення сесії
+  document.querySelectorAll("[data-del-session]").forEach(el => el.addEventListener("click", () => {
+    if (!confirm("Видалити цей запис?")) return;
+    S.sessions = S.sessions.filter(s => String(s.id) !== el.dataset.delSession);
+    save(); render();
+  }));
+  // налаштування
+  const sd = document.getElementById("start-date");
+  if (sd) sd.addEventListener("change", () => { S.startDate = sd.value || null; save(); });
+  const ej = document.getElementById("export-json");
+  if (ej) ej.addEventListener("click", () => download(`kpt-kurs-backup-${todayISO()}.json`, Store.export(S), "application/json"));
+  const em = document.getElementById("export-md");
+  if (em) em.addEventListener("click", () => download(`kpt-zhurnal-${todayISO()}.md`, journalToMarkdown(), "text/markdown"));
+  const ij = document.getElementById("import-json");
+  if (ij) ij.addEventListener("change", () => {
+    const f = ij.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        S = Store.import(r.result);
+        alert("Дані відновлено ✅");
+        render();
+      } catch (e) { alert("Не вдалося прочитати файл: " + e.message); }
+    };
+    r.readAsText(f);
+  });
+  const rs = document.getElementById("reset-all");
+  if (rs) rs.addEventListener("click", () => {
+    if (!confirm("Видалити ВСІ дані (журнал, прогрес, результати тестів)? Це незворотно.")) return;
+    if (!confirm("Точно? Рекомендується спершу зробити бекап.")) return;
+    S = Store.defaults(); save(); location.hash = "#/"; render();
+  });
+}
+
+window.addEventListener("hashchange", render);
+render();
+
+// PWA: реєстрація service worker
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
