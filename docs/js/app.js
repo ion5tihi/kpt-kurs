@@ -20,6 +20,11 @@ function fmtDate(iso) {
   const [y, m, d] = iso.split("-");
   return `${Number(d)} ${MONTHS_UA[Number(m) - 1] || m} ${y}`;
 }
+function fmtDateShort(iso) {
+  if (!iso) return "";
+  const [, m, d] = iso.split("-");
+  return `${Number(d)} ${MONTHS_UA[Number(m) - 1] || m}`;
+}
 function shuffle(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -121,15 +126,20 @@ function viewDashboard() {
   const sw = sessionsThisWeek();
   const allDone = COURSE.blocks.every(b => blockDone(b.id));
   const best = blockBestQuiz(cur.id);
+  const doneCount = COURSE.blocks.filter(b => blockDone(b.id)).length;
   return `
-  ${header("КПТ-Курс — наркологія")}
+  ${header("КПТ-Курс")}
   <main>
-    <section class="card hero">
-      <div class="progress-row">
-        <div class="progress-bar"><div style="width:${progressPct()}%"></div></div>
-        <span class="progress-num">${progressPct()}%</span>
+    <section class="hero-ink">
+      <div class="hero-top">
+        <p class="overline">Прогрес курсу</p>
+        ${week ? `<span class="hero-week">Тиждень ${week}</span>` : ""}
       </div>
-      <p class="muted small">${week ? `Тиждень ${week} · ` : ""}${COURSE.blocks.filter(b => blockDone(b.id)).length} з ${COURSE.blocks.length} блоків закрито</p>
+      <div class="hero-num-row">
+        <span class="hero-num">${doneCount} з ${COURSE.blocks.length}</span>
+        <span class="hero-cap">блоків закрито</span>
+      </div>
+      <div class="hero-bar"><div style="width:${progressPct()}%"></div></div>
     </section>
 
     ${allDone ? `
@@ -140,29 +150,35 @@ function viewDashboard() {
     </section>` : `
     <section class="card">
       <p class="overline">Поточний блок</p>
-      <h2>Блок ${cur.id} — ${esc(cur.title)}</h2>
-      <p class="muted">${esc(cur.weeks)}</p>
-      ${best ? `<p class="small">Тест: ${best.score}/${best.total}${blockQuizPassed(cur.id) ? " ✅" : ""}</p>` : ""}
+      <h2>Блок ${cur.id} · ${esc(cur.title)}</h2>
+      <p class="badges">
+        <span class="badge">${esc(cur.weeks)}</span>
+        ${best ? `<span class="badge ${blockQuizPassed(cur.id) ? "ok" : ""}">Тест ${Math.round(best.score / best.total * 100)}%</span>` : ""}
+      </p>
       <div class="btn-row">
         <a class="btn primary" href="#/block/${cur.id}">Відкрити блок</a>
-        <a class="btn" href="#/quiz/${cur.id}">Тест</a>
+        <a class="btn ghost fit" href="#/quiz/${cur.id}">Тест</a>
       </div>
     </section>`}
 
     <section class="card">
       <p class="overline">Практика цього тижня</p>
       <div class="week-sessions">
-        <span class="big-num ${sw >= 2 ? "ok" : ""}">${sw} / 2</span>
-        <span class="muted small">сесій у тренажері<br>(мінімум курсу — 2 на тиждень)</span>
+        <span class="practice-num ${sw >= 2 ? "ok" : ""}">${sw} / 2</span>
+        ${sw >= 2
+          ? `<span class="badge ok">мінімум виконано</span>`
+          : `<span class="badge">мінімум — 2 на тиждень</span>`}
       </div>
-      <a class="btn primary wide" href="#/journal/new">+ Запис у журнал</a>
+      <a class="btn ghost wide" href="#/journal/new">+ Запис у журнал</a>
     </section>
 
     ${Object.keys(S.quizWrong).length ? `
-    <section class="card">
-      <p class="overline">Повторення</p>
-      <p class="small">Питань з помилками: <b>${Object.keys(S.quizWrong).length}</b></p>
-      <a class="btn wide" href="#/review">Повторити помилки</a>
+    <section class="card repeat-card">
+      <div style="flex:1">
+        <h3>Повторення</h3>
+        <p class="repeat-sub">Питань з помилками: ${Object.keys(S.quizWrong).length}</p>
+      </div>
+      <a class="btn ink" href="#/review">Повторити</a>
     </section>` : ""}
 
     <details class="card details">
@@ -183,6 +199,7 @@ function viewDashboard() {
 // ── Список блоків ────────────────────────────────────────
 
 function viewBlocks() {
+  const checkIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
   return `
   ${header("Курс")}
   <main>
@@ -192,20 +209,19 @@ function viewBlocks() {
       const quiz = blockQuizPassed(b.id);
       const check = blockChecklistDone(b);
       return `<a class="card block-card ${done ? "b-done" : ""} ${cur ? "b-cur" : ""}" href="#/block/${b.id}">
-        <div class="block-num">${done ? "✅" : b.id}</div>
+        <div class="block-num">${done ? checkIcon : b.id}</div>
         <div class="block-info">
-          <h3>${esc(b.title)}</h3>
-          <p class="muted small">${esc(b.weeks)}</p>
-          <p class="small badges">
+          <h3>Блок ${b.id} · ${esc(b.title)}</h3>
+          <p class="badges sm">
+            <span class="badge">${esc(b.weeks)}</span>
             ${b.exit.length ? `<span class="badge ${check ? "ok" : ""}">чеклист ${b.exit.filter((_, i) => S.checklist[`b${b.id}-${i}`]).length}/${b.exit.length}</span>` : ""}
             <span class="badge ${quiz ? "ok" : ""}">тест ${quiz ? "складено" : "—"}</span>
           </p>
         </div>
-        <span class="chev">›</span>
       </a>`;
     }).join("")}
     <details class="card details">
-      <summary>📖 Бібліотека курсу</summary>
+      <summary>Бібліотека курсу</summary>
       <p class="overline">Хребет</p>
       <ul class="small">${COURSE.library.core.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
       <p class="overline">Наркологія</p>
@@ -228,19 +244,28 @@ function viewBlock(id) {
   const best = blockBestQuiz(id);
   const qCount = QUIZ.filter(q => q.block === id).length;
   return `
-  ${header(`Блок ${b.id} — ${b.title}`, "#/blocks")}
+  ${header(`Блок ${b.id} · ${b.title}`, "#/blocks")}
   <main>
     <section class="card">
-      <p class="muted">${esc(b.weeks)}${done ? " · ✅ закрито" : ""}</p>
-      ${b.ctsr.length ? `<p class="overline">Цільові пункти CTS-R</p>
+      <p class="badges">
+        <span class="badge">${esc(b.weeks)}</span>
+        <span class="badge ${done ? "ok" : ""}">${done ? "закрито" : "не закрито"}</span>
+      </p>
+      ${b.ctsr.length ? `<p class="overline" style="margin-top:14px">Цільові пункти CTS-R</p>
       <p class="badges">${b.ctsr.map(k => `<span class="badge accent">${esc(CTSR_ITEMS[k])}</span>`).join("")}</p>` : ""}
     </section>
 
-    <section class="card"><p class="overline">Теорія</p><p class="small">${esc(b.theory)}</p></section>
-    <section class="card"><p class="overline">Дриль</p><p class="small">${esc(b.drill)}</p></section>
-    ${b.trap ? `<section class="card trap"><p class="overline">⚠️ Пастка блоку</p><p class="small">${esc(b.trap)}</p></section>` : ""}
+    <section class="card"><p class="overline">Теорія</p><p>${esc(b.theory)}</p></section>
+    <section class="card"><p class="overline">Дриль</p><p>${esc(b.drill)}</p></section>
+    ${b.trap ? `<section class="card trap">
+      <div class="trap-head">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+        <p class="overline">Пастка блоку</p>
+      </div>
+      <p>${esc(b.trap)}</p>
+    </section>` : ""}
 
-    <section class="card">
+    <section class="card checklist">
       <p class="overline">Критерій виходу</p>
       ${b.exit.map((e, i) => {
         const k = `b${b.id}-${i}`;
@@ -250,16 +275,18 @@ function viewBlock(id) {
 
     <section class="card">
       <p class="overline">Оцінка знань</p>
-      <p class="small">${qCount} питань · складено від ${Math.round(PASS * 100)}%${best ? ` · найкращий результат: <b>${best.score}/${best.total}</b>${quizPassed ? " ✅" : ""}` : ""}</p>
+      <p class="badges">
+        <span class="badge">${qCount} питань</span>
+        <span class="badge">поріг ${Math.round(PASS * 100)}%</span>
+        ${best ? `<span class="badge ${quizPassed ? "ok" : ""}">найкращий ${Math.round(best.score / best.total * 100)}%</span>` : ""}
+      </p>
       <a class="btn primary wide" href="#/quiz/${id}">${best ? "Пройти ще раз" : "Пройти тест"}</a>
     </section>
 
-    <section class="card">
-      ${done
-        ? `<button class="btn wide" data-reopen="${id}">Відкрити блок знову</button>`
-        : `<button class="btn ${checkDone && quizPassed ? "primary" : ""} wide" data-close="${id}">Закрити блок</button>
-           ${checkDone && quizPassed ? "" : `<p class="small muted center">Рекомендація: спершу чеклист і тест. Закрити можна і так — темп вільний.</p>`}`}
-    </section>
+    ${done
+      ? `<button class="btn ghost wide" data-reopen="${id}">Відкрити блок знову</button>`
+      : `<button class="btn ${checkDone && quizPassed ? "primary" : "ghost"} wide" data-close="${id}">Закрити блок</button>
+         ${checkDone && quizPassed ? "" : `<p class="small muted center">Рекомендація: спершу чеклист і тест. Закрити можна і так — темп вільний.</p>`}`}
   </main>
   ${nav("#/blocks")}`;
 }
@@ -425,20 +452,25 @@ function viewJournalNew() {
   return `
   ${header("Нова сесія", "#/journal")}
   <main>
-    <form id="session-form" class="card form">
-      <label>Дата <input type="date" name="date" value="${todayISO()}" required></label>
-      <label>Пацієнт (діагноз / етап / налаштування)
-        <input type="text" name="patient" placeholder="напр.: алкогольна залежність, амбівалентний, опір"></label>
-      <label>Фокус сесії
-        <input type="text" name="focus" placeholder="напр.: OARS — тільки відкриті питання і рефлексії"></label>
-      <label>Блок
-        <select name="block" id="block-select">
-          ${COURSE.blocks.map(b => `<option value="${b.id}" ${b.id === cur.id ? "selected" : ""}>Блок ${b.id} — ${esc(b.title)}</option>`).join("")}
-        </select></label>
+    <form id="session-form" class="form">
+      <div class="card">
+        <label>Дата <input type="date" name="date" value="${todayISO()}" required></label>
+        <label>Пацієнт (діагноз / етап / налаштування)
+          <input type="text" name="patient" placeholder="напр.: алкогольна залежність, амбівалентний"></label>
+        <label>Фокус сесії
+          <input type="text" name="focus" placeholder="напр.: OARS — відкриті питання і рефлексії"></label>
+        <label>Блок
+          <select name="block" id="block-select">
+            ${COURSE.blocks.map(b => `<option value="${b.id}" ${b.id === cur.id ? "selected" : ""}>Блок ${b.id} · ${esc(b.title)}</option>`).join("")}
+          </select></label>
+      </div>
       <div id="score-fields"></div>
-      <label>Одна річ, яку наступного разу зроблю інакше
-        <textarea name="note" rows="2"></textarea></label>
-      <label class="check-row"><input type="checkbox" name="redFlag"><span>🚩 Червоний прапорець (пропущений скринінг безпеки)</span></label>
+      <div class="card">
+        <label>Одна річ, яку наступного разу зроблю інакше
+          <textarea name="note" rows="3"></textarea></label>
+        <label class="check-row"><input type="checkbox" name="redFlag"><span>Червоний прапорець (пропущений скринінг безпеки)</span>
+          <span class="session-flag"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4 3h2v18H4zM6 4h11l-3 4 3 4H6z"/></svg></span></label>
+      </div>
       <button class="btn primary wide" type="submit">Зберегти</button>
     </form>
   </main>`;
@@ -449,25 +481,25 @@ function scoreFieldsHTML(blockId) {
   if (!b) return "";
   let html = "";
   if (b.ctsr.length) {
-    html += `<p class="overline">Бали цільових пунктів CTS-R (0–6)</p>` + b.ctsr.map(k => `
+    html += `<div class="card"><p class="overline">Бали CTS-R · 0–6</p>` + b.ctsr.map(k => `
       <label class="score-row">${esc(CTSR_ITEMS[k])}
         <select name="score-${k}"><option value="">—</option>${[0, 1, 2, 3, 4, 5, 6].map(v => `<option value="${v}">${v}</option>`).join("")}</select>
-      </label>`).join("");
+      </label>`).join("") + `</div>`;
   }
   if (b.miti) {
-    html += `<p class="overline">MITI-лічильник</p>
+    html += `<div class="card"><p class="overline">MITI-лічильник</p>
       <div class="miti-grid">
         <label>Прості рефлексії <input type="number" name="miti-simple" min="0" inputmode="numeric" placeholder="0"></label>
         <label>Складні рефлексії <input type="number" name="miti-complex" min="0" inputmode="numeric" placeholder="0"></label>
         <label>Питання <input type="number" name="miti-questions" min="0" inputmode="numeric" placeholder="0"></label>
         <label>MI-неузгоджені <input type="number" name="miti-incons" min="0" inputmode="numeric" placeholder="0"></label>
       </div>
-      <p class="small muted">Пороги: рефлексії:питання ≥1:1 · складні ≥40% · неузгоджені = 0</p>`;
+      <p class="form-hint">Пороги: Р:П ≥ 1 · складні ≥ 40% · MI-неузгоджені = 0</p></div>`;
   }
   if (b.narco) {
-    html += `<p class="overline">Наркологічна специфіка</p>
+    html += `<div class="card"><p class="overline">Наркологічна специфіка</p>
       <label class="check-row"><input type="checkbox" name="narco-craving"><span>Крейвінг / тригери — було</span></label>
-      <label class="check-row"><input type="checkbox" name="narco-relapse"><span>Профілактика рецидиву — було</span></label>`;
+      <label class="check-row"><input type="checkbox" name="narco-relapse"><span>Профілактика рецидиву — було</span></label></div>`;
   }
   return html;
 }
@@ -476,16 +508,23 @@ function scoreFieldsHTML(blockId) {
 
 function sparkline(values) {
   // values: масив 0..6
-  const w = 260, h = 48, pad = 4;
+  const w = 311, h = 72, pad = 8;
   if (values.length === 1) values = [values[0], values[0]];
   const step = (w - pad * 2) / (values.length - 1);
   const y = v => h - pad - (v / 6) * (h - pad * 2);
-  const pts = values.map((v, i) => `${pad + i * step},${y(v).toFixed(1)}`).join(" ");
+  const pts = values.map((v, i) => `${(pad + i * step).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
   return `<svg viewBox="0 0 ${w} ${h}" class="spark" preserveAspectRatio="none">
-    <line x1="${pad}" y1="${y(3)}" x2="${w - pad}" y2="${y(3)}" class="spark-target"/>
+    <line x1="0" y1="${y(3)}" x2="${w}" y2="${y(3)}" class="spark-target"/>
     <polyline points="${pts}" class="spark-line"/>
-    ${values.map((v, i) => `<circle cx="${pad + i * step}" cy="${y(v).toFixed(1)}" r="3" class="spark-dot ${v >= 3 ? "ok" : ""}"/>`).join("")}
+    ${values.map((v, i) => `<circle cx="${(pad + i * step).toFixed(1)}" cy="${y(v).toFixed(1)}" r="4.5" class="spark-dot ${v >= 3 ? "ok" : ""}"/>`).join("")}
   </svg>`;
+}
+
+function pluralSessions(n) {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return "сесія";
+  if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return "сесії";
+  return "сесій";
 }
 
 function isStalled(vals) {
@@ -509,21 +548,31 @@ function viewStats() {
   <main>
     ${keys.length ? keys.map(k => {
       const vals = series[k];
+      const last = vals[vals.length - 1];
       const stalled = isStalled(vals);
       return `<section class="card ${stalled ? "trap" : ""}">
-        <div class="stat-head"><b>${esc(CTSR_ITEMS[k])}</b><span class="muted small">ост.: ${vals[vals.length - 1]} / 6</span></div>
+        <div class="stat-head">
+          <span class="stat-name">${esc(CTSR_ITEMS[k])}</span>
+          <span class="stat-val ${!stalled && last >= 3 ? "ok" : ""}">${last}<span class="stat-of"> / 6</span></span>
+        </div>
         ${sparkline(vals)}
-        ${stalled ? `<p class="small">⚠️ Пункт не росте — за правилами курсу він стає фокусом позачергової сесії.</p>` : ""}
+        ${stalled
+          ? `<p class="small">Пункт не росте — за правилами курсу він стає фокусом позачергової сесії.</p>`
+          : `<div class="stat-meta"><span>${vals.length} ${pluralSessions(vals.length)}</span><span>пунктир — ціль 3</span></div>`}
       </section>`;
     }).join("") : `<section class="card center muted"><p>Дані з'являться після записів у журналі з балами CTS-R.</p></section>`}
     ${mitiSessions.length ? `<section class="card">
       <p class="overline">MITI за сесіями</p>
-      ${mitiSessions.slice(-8).map(s => {
+      ${mitiSessions.slice(-8).reverse().map(s => {
         const m = mitiEval(s.miti);
-        return `<p class="small badges"><span class="muted">${fmtDate(s.date)}</span>
-          <span class="badge ${m.ratioOk ? "ok" : "no"}">Р:П ${m.ratio === Infinity ? "∞" : m.ratio.toFixed(1)}</span>
-          <span class="badge ${m.complexOk ? "ok" : "no"}">${Math.round(m.pctComplex * 100)}%</span>
-          <span class="badge ${m.inconsOk ? "ok" : "no"}">неузг. ${m.incons}</span></p>`;
+        return `<div class="miti-row">
+          <span class="miti-date">${fmtDateShort(s.date)}</span>
+          <span class="badges sm">
+            <span class="badge ${m.ratioOk ? "ok" : "no"}">Р:П ${m.ratio === Infinity ? "∞" : m.ratio.toFixed(1)}</span>
+            <span class="badge ${m.complexOk ? "ok" : "no"}">складні ${Math.round(m.pctComplex * 100)}%</span>
+            <span class="badge ${m.inconsOk ? "ok" : "no"}">MI-неузг. ${m.incons}</span>
+          </span>
+        </div>`;
       }).join("")}</section>` : ""}
     <p class="muted small center">${esc(COURSE.journal.monthly)}</p>
   </main>
@@ -534,27 +583,29 @@ function viewStats() {
 
 function viewSettings() {
   return `
-  ${header("Налаштування")}
+  ${header("Ще")}
   <main>
     <section class="card form">
       <label>Дата початку курсу
         <input type="date" id="start-date" value="${S.startDate || ""}"></label>
-      <p class="small muted">Використовується для лічильника тижнів на головній. Темп курсу вільний.</p>
+      <p class="settings-note">Від неї рахується поточний тиждень курсу на Головній. Темп курсу вільний.</p>
     </section>
     <section class="card">
       <p class="overline">Дані</p>
-      <button class="btn wide" id="export-json">⬇️ Бекап усіх даних (JSON)</button>
-      <button class="btn wide" id="export-md">⬇️ Журнал у Markdown (для Obsidian)</button>
-      <label class="btn wide file-btn">⬆️ Відновити з бекапу<input type="file" id="import-json" accept=".json,application/json" hidden></label>
+      <button class="btn ghost wide" id="export-json">Зберегти бекап (JSON)</button>
+      <button class="btn ghost wide" id="export-md">Експорт журналу (Markdown)</button>
+      <label class="btn ghost wide file-btn">Відновити з бекапу…<input type="file" id="import-json" accept=".json,application/json" hidden></label>
+      <p class="settings-note">Дані зберігаються лише на цьому пристрої.</p>
     </section>
     <section class="card">
       <p class="overline">Про курс</p>
       <p class="small">${esc(COURSE.limits)}</p>
     </section>
-    <section class="card">
+    <section class="card danger-card">
+      <p class="overline">Небезпечна зона</p>
       <button class="btn danger wide" id="reset-all">Скинути всі дані</button>
+      <p class="settings-note">Подвійне підтвердження. Дію неможливо скасувати.</p>
     </section>
-    <p class="center muted small">КПТ-Курс · дані зберігаються лише на цьому пристрої</p>
   </main>
   ${nav("#/settings")}`;
 }

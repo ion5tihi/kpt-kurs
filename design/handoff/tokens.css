@@ -1,5 +1,5 @@
 /* КПТ-Курс — дизайн-токени (редизайн, липень 2026)
-   Імена змінних збережено з поточної кодової бази + додано --ink, --accent-strong.
+   Імена змінних збережено з поточної кодової бази + додано --ink / --ink-text (чорнильний блок питання).
    Світла тема — за замовчуванням, темна — через prefers-color-scheme. */
 
 :root {
@@ -22,7 +22,12 @@
   /* Семантика */
   --ok: #1E7F4F;       --ok-soft: #DFF2E7;     --ok-border: #BCE3CD;   --ok-text: #14522F;
   --no: #C43D3D;       --no-soft: #FADEDE;     --no-border: #F0C4C4;   --no-text: #7C2626;
-  --warn-soft: #FBEFD9;
+  --warn-soft: #FBEFD9;  --warn-border: #EBD9B4;  --warn-text: #8A6A1F;  --warn-body: #4A3F28;
+
+  --field: #F5F3EE;           /* фон полів вводу та варіантів (вар. Б) */
+  --checkbox-border: #C8CDD5;
+  --accent-on-ink: #8B84E8;   /* акцент на чорнильній картці (прогрес-бар hero) */
+  --overline-on-ink: #A7A2E8; /* оверлайн на чорнильній картці */
 
   --border: #E3DFD5;
   --border-subtle: #EEEAE0;   /* внутрішні розділювачі картки */
@@ -63,7 +68,12 @@
 
     --ok: #8ED9AE;    --ok-soft: rgba(60,168,107,.14);   --ok-border: rgba(60,168,107,.35);  --ok-text: #8ED9AE;
     --no: #E06A6A;    --no-soft: rgba(224,106,106,.14);  --no-border: rgba(224,106,106,.35); --no-text: #F0A0A0;
-    --warn-soft: rgba(217,164,65,.14);
+    --warn-soft: rgba(217,164,65,.14);  --warn-border: rgba(217,164,65,.35);  --warn-text: #D9B96A;  --warn-body: #CBBE9E;
+
+    --field: rgba(255,255,255,.06);
+    --checkbox-border: #3A404B;
+    --accent-on-ink: #8B84E8;
+    --overline-on-ink: #A7A2E8;
 
     --border: #2E323B;
     --border-subtle: #2A2E36;
