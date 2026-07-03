@@ -1,0 +1,79 @@
+/* КПТ-Курс — дизайн-токени (редизайн, липень 2026)
+   Імена змінних збережено з поточної кодової бази + додано --ink, --accent-strong.
+   Світла тема — за замовчуванням, темна — через prefers-color-scheme. */
+
+:root {
+  /* Поверхні */
+  --bg: #F3F1EC;          /* теплий паперовий фон замість сіро-блакитного */
+  --card: #FFFFFF;
+  --ink: #191D24;         /* інвертований блок питання в тесті */
+  --ink-text: #F6F4EE;    /* текст на --ink */
+
+  /* Текст */
+  --text: #191D24;
+  --muted: #5C6470;
+  --muted-2: #8A93A0;     /* підписи-лейбли, оверлайни */
+
+  /* Акцент (ірис замість нейтрального синього) */
+  --accent: #443DA3;
+  --accent-soft: #E9E7FA;
+  --on-accent: #FFFFFF;
+
+  /* Семантика */
+  --ok: #1E7F4F;       --ok-soft: #DFF2E7;     --ok-border: #BCE3CD;   --ok-text: #14522F;
+  --no: #C43D3D;       --no-soft: #FADEDE;     --no-border: #F0C4C4;   --no-text: #7C2626;
+  --warn-soft: #FBEFD9;
+
+  --border: #E3DFD5;
+  --border-subtle: #EEEAE0;   /* внутрішні розділювачі картки */
+
+  /* Форма */
+  --radius: 14px;       /* картки, кнопки, варіанти відповіді */
+  --radius-lg: 16px;    /* великі контейнери (запис журналу, блок питання) */
+  --radius-pill: 999px; /* чипи, прогрес-бар */
+
+  /* Типографіка (системний стек, без webfonts) */
+  --font: -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif; /* лише якщо обрано варіант Б питання */
+  /* Шкала:
+     56/800 ls-.02em tabular  — рахунок результату
+     22/750                   — заголовок екрана
+     20/600 lh1.4             — питання тесту (вар. А); Georgia 23/400 (вар. Б)
+     17/650                   — заголовок картки, текст кнопки
+     16/400 lh1.45            — тіло, варіанти відповіді
+     13/650                   — чипи, лічильники
+     11/700 caps ls.08em      — оверлайни секцій
+     Числа: font-variant-numeric: tabular-nums. Тач-зони ≥56px. */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15171C;
+    --card: #1E2128;
+    --ink: #0F1115;
+    --ink-text: #EDEDE6;
+
+    --text: #EDEDE6;
+    --muted: #9AA1AC;
+    --muted-2: #767E8A;
+
+    --accent: #8B84E8;          /* світліший ірис; текст на ньому — темний */
+    --accent-soft: rgba(139,132,232,.16);
+    --on-accent: #15171C;
+
+    --ok: #8ED9AE;    --ok-soft: rgba(60,168,107,.14);   --ok-border: rgba(60,168,107,.35);  --ok-text: #8ED9AE;
+    --no: #E06A6A;    --no-soft: rgba(224,106,106,.14);  --no-border: rgba(224,106,106,.35); --no-text: #F0A0A0;
+    --warn-soft: rgba(217,164,65,.14);
+
+    --border: #2E323B;
+    --border-subtle: #2A2E36;
+  }
+}
+
+/* Ключові стани екрана тесту (варіант А):
+   .quiz-question  { background: var(--ink); color: var(--ink-text); }  — питання домінує
+   .option         { background: var(--card); border: 1.5px solid var(--border); min-height: 56px; }
+   .option.correct { background: var(--ok-soft); border-color: var(--ok); color: var(--ok-text); font-weight: 550; }
+   .option.wrong   { background: var(--no-soft); border-color: var(--no); color: var(--no-text); font-weight: 550; }
+   .option.dimmed  { opacity: .45; pointer-events: none; }
+*/

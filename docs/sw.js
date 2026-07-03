@@ -1,5 +1,5 @@
 // Service worker: офлайн-робота через precache. При оновленні версії — новий кеш.
-const VERSION = "v2";
+const VERSION = "v3";
 const CACHE = `kpt-kurs-${VERSION}`;
 const ASSETS = [
   "./",

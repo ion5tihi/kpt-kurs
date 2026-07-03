@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="design_doc_mode" content="canvas">
+  <style>
+    body { margin: 0; background: #E9E6DE; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<section style="display: flex; flex-wrap: wrap; gap: 48px; padding: 48px; align-items: flex-start; font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;">
+
+  <!-- ============ 1a: ТЕСТ — Варіант А (інвертований блок питання) ============ -->
+  <div id="1a" style="display: flex; flex-direction: column; gap: 16px;">
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+      <a href="#1a" style="display: inline-block; background: #191D24; color: #F3F1EC; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 6px; text-decoration: none;">1a</a>
+      <div style="font-size: 15px; font-weight: 650; color: #191D24;">Тест — варіант А: питання як «чорнильний» блок</div>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: flex-start;">
+
+      <!-- Frame A1: питання, ще не відповіли -->
+      <div style="width: 375px; min-height: 812px; background: #F3F1EC; border-radius: 24px; box-shadow: 0 2px 8px rgba(25,29,36,.10), 0 12px 32px rgba(25,29,36,.10); overflow: hidden; display: flex; flex-direction: column;">
+        <!-- Шапка -->
+        <div style="display: flex; align-items: center; gap: 8px; padding: 18px 20px 10px 12px;">
+          <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #191D24; cursor: pointer;">‹</div>
+          <div style="font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #5C6470;">Тест · Блок 2</div>
+          <div style="margin-left: auto; font-size: 13px; font-weight: 600; color: #5C6470; font-variant-numeric: tabular-nums;">4 / 12</div>
+        </div>
+        <!-- Прогрес -->
+        <div style="margin: 0 20px 20px; height: 4px; background: #E3DFD5; border-radius: 999px; overflow: hidden;">
+          <div style="width: 33%; height: 100%; background: #443DA3; border-radius: 999px;"></div>
+        </div>
+        <!-- Питання: домінує -->
+        <div style="margin: 0 16px 20px; background: #191D24; color: #F6F4EE; border-radius: 16px; padding: 22px 20px 24px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #A7A2E8; margin-bottom: 10px;">Питання 4</div>
+          <div style="font-size: 20px; font-weight: 600; line-height: 1.4; text-wrap: pretty;">Пацієнт каже: «Я можу кинути будь-коли, просто зараз не час». Яка це стадія змін за транстеоретичною моделлю?</div>
+        </div>
+        <!-- Варіанти -->
+        <div style="display: flex; flex-direction: column; gap: 10px; padding: 0 16px;">
+          <div style="display: flex; gap: 12px; align-items: flex-start; background: #FFFFFF; border: 1.5px solid #E3DFD5; border-radius: 14px; padding: 14px 16px; min-height: 56px; cursor: pointer;">
+            <div style="flex: none; width: 26px; height: 26px; border-radius: 8px; background: #F3F1EC; border: 1px solid #E3DFD5; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #5C6470;">А</div>
+            <div style="font-size: 16px; line-height: 1.45; color: #191D24; padding-top: 2px;">Передконтемпляція — проблема не визнається, зміни не розглядаються</div>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: flex-start; background: #FFFFFF; border: 1.5px solid #E3DFD5; border-radius: 14px; padding: 14px 16px; min-height: 56px; cursor: pointer;">
+            <div style="flex: none; width: 26px; height: 26px; border-radius: 8px; background: #F3F1EC; border: 1px solid #E3DFD5; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #5C6470;">Б</div>
+            <div style="font-size: 16px; line-height: 1.45; color: #191D24; padding-top: 2px;">Контемпляція — амбівалентність, зважування «за» і «проти»</div>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: flex-start; background: #FFFFFF; border: 1.5px solid #E3DFD5; border-radius: 14px; padding: 14px 16px; min-height: 56px; cursor: pointer;">
+            <div style="flex: none; width: 26px; height: 26px; border-radius: 8px; background: #F3F1EC; border: 1px solid #E3DFD5; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #5C6470;">В</div>
+            <div style="font-size: 16px; line-height: 1.45; color: #191D24; padding-top: 2px;">Підготовка — є намір діяти найближчим часом</div>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: flex-start; background: #FFFFFF; border: 1.5px solid #E3DFD5; border-radius: 14px; padding: 14px 16px; min-height: 56px; cursor: pointer;">
+            <div style="flex: none; width: 26px; height: 26px; border-radius: 8px; background: #F3F1EC; border: 1px solid #E3DFD5; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #5C6470;">Г</div>
+            <div style="font-size: 16px; line-height: 1.45; color: #191D24; padding-top: 2px;">Дія — активна зміна поведінки триває</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame A2: відповіли неправильно -->
+      <div style="width: 375px; min-height: 812px; background: #F3F1EC; border-radius: 24px; box-shadow: 0 2px 8px rgba(25,29,36,.10), 0 12px 32px rgba(25,29,36,.10); overflow: hidden; display: flex; flex-direction: column;">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 18px 20px 10px 12px;">
+          <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #191D24;">‹</div>
+          <div style="font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #5C6470;">Тест · Блок 2</div>
+          <div style="margin-left: auto; font-size: 13px; font-weight: 600; color: #5C6470; font-variant-numeric: tabular-nums;">4 / 12</div>
+        </div>
+        <div style="margin: 0 20px 20px; height: 4px; background: #E3DFD5; border-radius: 999px; overflow: hidden;">
+          <div style="width: 33%; height: 100%; background: #443DA3; border-radius: 999px;"></div>
+        </div>
+        <div style="margin: 0 16px 20px; background: #191D24; color: #F6F4EE; border-radius: 16px; padding: 22px 20px 24px;">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #A7A2E8; margin-bottom: 10px;">Питання 4</div>
+          <div style="font-size: 20px; font-weight: 600; line-height: 1.4; text-wrap: pretty;">Пацієнт каже: «Я можу кинути будь-коли, просто зараз не час». Яка це стадія змін за транстеоретичною моделлю?</div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; padding: 0 16px;">
+          <!-- правильний -->
+          <div style="display: flex; gap: 12px; align-items: flex-start; background: #DFF2E7; border: 1.5px solid #1E7F4F; border-radius: 14px; padding: 14px 16px; min-height: 56px;">
+            <div style="flex: none; width: 26px; height: 26px; border-radius: 8px; background: #1E7F4F; display: flex; align-items: center; justify-content: center; color: #fff;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></div>
+            <div style="font-size: 16px; line-height: 1.45; color: #14522F; font-weight: 550; padding-top: 2px;">Передконтемпляція — проблема не визнається, зміни не розглядаються</div>
+          </div>
+          <!-- обраний неправильний -->
+          <div style="display: flex; gap: 12px; align-items: flex-start; background: #FADEDE; border: 1.5px solid #C43D3D; border-radius: 14px; padding: 14px 16px; min-height: 56px;">
+            <div style="flex: none; width: 26px; height: 26px; border-radius: 8px; background: #C43D3D; display: flex; align-items: center; justify-content: center; color: #fff;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></div>
+            <div style="font-size: 16px; line-height: 1.45; color: #7C2626; font-weight: 550; padding-top: 2px;">Контемпляція — амбівалентність, зважування «за» і «проти»</div>
+          </div>
+          <!-- пригашені -->
+          <div style="display: flex; gap: 12px; align-items: flex-start; background: #FFFFFF; border: 1.5px solid #E3DFD5; border-radius: 14px; padding: 14px 16px; min-height: 56px; opacity: .45;">
+            <div style="flex: none; width: 26px; height: 26px; border-radius: 8px; background: #F3F1EC; border: 1px solid #E3DFD5; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #5C6470;">В</div>
+            <div style="font-size: 16px; line-height: 1.45; color: #191D24; padding-top: 2px;">Підготовка — є намір діяти найближчим часом</div>
+          </div>
+          <div style="display: flex; gap: 12px; align-items: flex-start; background: #FFFFFF; border: 1.5px solid #E3DFD5; border-radius: 14px; padding: 14px 16px; min-height: 56px; opacity: .45;">
+            <div style="flex: none; width: 26px; height: 26px; border-radius: 8px; background: #F3F1EC; border: 1px solid #E3DFD5; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #5C6470;">Г</div>
+            <div style="font-size: 16px; line-height: 1.45; color: #191D24; padding-top: 2px;">Дія — активна зміна поведінки триває</div>
+          </div>
+        </div>
+        <!-- Пояснення -->
+        <div style="margin: 16px 16px 0; background: #FFFFFF; border: 1.5px solid #E3DFD5; border-left: none; border-right: none; border-radius: 14px; border: 1.5px solid #E3DFD5; padding: 16px;">
+          <div style="font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #C43D3D; margin-bottom: 6px;">Неправильно</div>
+          <div style="font-size: 15px; line-height: 1.5; color: #3A414C;">«Можу будь-коли, але не зараз» — це заперечення проблеми, а не зважування. Амбівалентність у контемпляції звучить як «і хочу, і не можу».</div>
+        </div>
+        <!-- Далі -->
+        <div style="margin: 16px 16px 24px; margin-top: auto; padding-top: 16px;">
+          <div style="margin: 0 0 24px; background: #443DA3; color: #FFFFFF; border-radius: 14px; min-height: 56px; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 650; cursor: pointer;">Далі →</div>
+        </div>
+      </div>
+
+      <!-- Frame A3: результат -->
+      <div style="width: 375px; min-height: 812px; background: #F3F1EC; border-radius: 24px; box-shadow: 0 2px 8px rgba(25,29,36,.10), 0 12px 32px rgba(25,29,36,.10); overflow: hidden; display: flex; flex-direction: column;">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 18px 20px 10px 12px;">
+          <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #191D24;">‹</div>
+          <div style="font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #5C6470;">Тест · Блок 2</div>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 0 24px; gap: 24px;">
+          <div style="background: #191D24; border-radius: 20px; padding: 40px 24px; text-align: center;">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #A7A2E8; margin-bottom: 16px;">Результат</div>
+            <div style="font-size: 56px; font-weight: 800; color: #F6F4EE; line-height: 1; font-variant-numeric: tabular-nums; letter-spacing: -.02em;">10 / 12</div>
+            <div style="font-size: 20px; font-weight: 600; color: #6EC796; margin-top: 12px;">83% — тест складено</div>
+            <div style="font-size: 14px; color: #9AA1AC; margin-top: 8px;">Поріг — 80%. Найкращий результат оновлено.</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="background: #443DA3; color: #FFFFFF; border-radius: 14px; min-height: 56px; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 650; cursor: pointer;">Готово</div>
+            <div style="background: transparent; color: #443DA3; border: 1.5px solid #443DA3; border-radius: 14px; min-height: 56px; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 650; cursor: pointer;">Ще раз</div>
+          </div>
+        </div>
+        <div style="height: 32px;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ 1b: ТЕСТ — Варіант Б (типографічне питання, Georgia) ============ -->
+  <div id="1b" style="display: flex; flex-direction: column; gap: 16px;">
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+      <a href="#1b" style="display: inline-block; background: #191D24; color: #F3F1EC; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 6px; text-decoration: none;">1b</a>
+      <div style="font-size: 15px; font-weight: 650; color: #191D24;">Тест — варіант Б: питання великою серифною гарнітурою (Georgia — системна)</div>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: flex-start;">
+
+      <!-- Frame B1 -->
+      <div style="width: 375px; min-height: 812px; background: #FFFFFF; border-radius: 24px; box-shadow: 0 2px 8px rgba(25,29,36,.10), 0 12px 32px rgba(25,29,36,.10); overflow: hidden; display: flex; flex-direction: column;">
+        <div style="height: 6px; background: #E3DFD5;"><div style="width: 33%; height: 100%; background: #443DA3;"></div></div>
+        <div style="display: flex; align-items: center; gap: 8px; padding: 14px 20px 0 12px;">
+          <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #191D24;">‹</div>
+          <div style="margin-left: auto; font-size: 13px; font-weight: 700; color: #443DA3; background: #E9E7FA; padding: 6px 12px; border-radius: 999px; font-variant-numeric: tabular-nums;">Питання 4 з 12</div>
+        </div>
+        <!-- Питання -->
+        <div style="padding: 24px 24px 8px;">
+          <div style="font-family: Georgia, 'Times New Roman', serif; font-size: 23px; line-height: 1.4; color: #191D24; text-wrap: pretty;">Пацієнт каже: «Я можу кинути будь-коли, просто зараз не час». Яка це стадія змін за транстеоретичною моделлю?</div>
+          <div style="width: 48px; height: 3px; background: #443DA3; border-radius: 999px; margin-top: 18px;"></div>
+        </div>
+        <!-- Варіанти -->
+        <div style="display: flex; flex-direction: column; gap: 10px; padding: 20px 16px 0;">
+          <div style="background: #F5F3EE; border: 1.5px solid transparent; border-radius: 14px; padding: 15px 18px; min-height: 56px; font-size: 16px; line-height: 1.45; color: #191D24; cursor: pointer;">Передконтемпляція — проблема не визнається, зміни не розглядаються</div>
+          <div style="background: #F5F3EE; border: 1.5px solid transparent; border-radius: 14px; padding: 15px 18px; min-height: 56px; font-size: 16px; line-height: 1.45; color: #191D24; cursor: pointer;">Контемпляція — амбівалентність, зважування «за» і «проти»</div>
+          <div style="background: #F5F3EE; border: 1.5px solid transparent; border-radius: 14px; padding: 15px 18px; min-height: 56px; font-size: 16px; line-height: 1.45; color: #191D24; cursor: pointer;">Підготовка — є намір діяти найближчим часом</div>
+          <div style="background: #F5F3EE; border: 1.5px solid transparent; border-radius: 14px; padding: 15px 18px; min-height: 56px; font-size: 16px; line-height: 1.45; color: #191D24; cursor: pointer;">Дія — активна зміна поведінки триває</div>
+        </div>
+      </div>
+
+      <!-- Frame B2: відповіли -->
+      <div style="width: 375px; min-height: 812px; background: #FFFFFF; border-radius: 24px; box-shadow: 0 2px 8px rgba(25,29,36,.10), 0 12px 32px rgba(25,29,36,.10); overflow: hidden; display: flex; flex-direction: column;">
+        <div style="height: 6px; background: #E3DFD5;"><div style="width: 33%; height: 100%; background: #443DA3;"></div></div>
+        <div style="display: flex; align-items: center; gap: 8px; padding: 14px 20px 0 12px;">
+          <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #191D24;">‹</div>
+          <div style="margin-left: auto; font-size: 13px; font-weight: 700; color: #443DA3; background: #E9E7FA; padding: 6px 12px; border-radius: 999px; font-variant-numeric: tabular-nums;">Питання 4 з 12</div>
+        </div>
+        <div style="padding: 24px 24px 8px;">
+          <div style="font-family: Georgia, 'Times New Roman', serif; font-size: 23px; line-height: 1.4; color: #191D24; text-wrap: pretty;">Пацієнт каже: «Я можу кинути будь-коли, просто зараз не час». Яка це стадія змін за транстеоретичною моделлю?</div>
+          <div style="width: 48px; height: 3px; background: #443DA3; border-radius: 999px; margin-top: 18px;"></div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px; padding: 20px 16px 0;">
+          <div style="display: flex; gap: 10px; align-items: flex-start; background: #DFF2E7; border: 1.5px solid #1E7F4F; border-radius: 14px; padding: 15px 18px; min-height: 56px; font-size: 16px; line-height: 1.45; color: #14522F; font-weight: 550;"><svg style="flex: none; margin-top: 3px;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E7F4F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg><span>Передконтемпляція — проблема не визнається, зміни не розглядаються</span></div>
+          <div style="display: flex; gap: 10px; align-items: flex-start; background: #FADEDE; border: 1.5px solid #C43D3D; border-radius: 14px; padding: 15px 18px; min-height: 56px; font-size: 16px; line-height: 1.45; color: #7C2626; font-weight: 550;"><svg style="flex: none; margin-top: 3px;" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#C43D3D" stroke-width="3" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg><span>Контемпляція — амбівалентність, зважування «за» і «проти»</span></div>
+          <div style="background: #F5F3EE; border: 1.5px solid transparent; border-radius: 14px; padding: 15px 18px; min-height: 56px; font-size: 16px; line-height: 1.45; color: #191D24; opacity: .4;">Підготовка — є намір діяти найближчим часом</div>
+          <div style="background: #F5F3EE; border: 1.5px solid transparent; border-radius: 14px; padding: 15px 18px; min-height: 56px; font-size: 16px; line-height: 1.45; color: #191D24; opacity: .4;">Дія — активна зміна поведінки триває</div>
+        </div>
+        <div style="margin: 16px 16px 0; background: #FBF9F4; border: 1.5px solid #E3DFD5; border-radius: 14px; padding: 16px;">
+          <div style="font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #C43D3D; margin-bottom: 6px;">Неправильно</div>
+          <div style="font-size: 15px; line-height: 1.5; color: #3A414C;">«Можу будь-коли, але не зараз» — це заперечення проблеми, а не зважування. Амбівалентність у контемпляції звучить як «і хочу, і не можу».</div>
+        </div>
+        <div style="margin: auto 16px 24px; padding-top: 16px;">
+          <div style="background: #191D24; color: #FFFFFF; border-radius: 14px; min-height: 56px; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 650; cursor: pointer;">Далі →</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ 1c: ЖУРНАЛ — картка запису (світла + темна) ============ -->
+  <div id="1c" style="display: flex; flex-direction: column; gap: 16px;">
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+      <a href="#1c" style="display: inline-block; background: #191D24; color: #F3F1EC; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 6px; text-decoration: none;">1c</a>
+      <div style="font-size: 15px; font-weight: 650; color: #191D24;">Журнал — картка запису: світла і темна тема</div>
+    </div>
+    <div style="display: flex; gap: 24px; align-items: flex-start;">
+
+      <!-- Світла -->
+      <div style="width: 375px; background: #F3F1EC; border-radius: 24px; box-shadow: 0 2px 8px rgba(25,29,36,.10), 0 12px 32px rgba(25,29,36,.10); padding: 20px 16px 24px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-size: 22px; font-weight: 750; color: #191D24; padding: 0 4px;">Журнал</div>
+        <div style="background: #443DA3; color: #FFFFFF; border-radius: 14px; min-height: 56px; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 650; cursor: pointer;">+ Нова сесія</div>
+
+        <!-- Картка запису -->
+        <div style="background: #FFFFFF; border: 1px solid #E3DFD5; border-radius: 16px; overflow: hidden;">
+          <!-- Шапка запису -->
+          <div style="display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid #EEEAE0;">
+            <div style="flex: none; white-space: nowrap; font-size: 16px; font-weight: 750; color: #191D24; font-variant-numeric: tabular-nums;">2 лип 2026</div>
+            <div style="font-size: 12px; font-weight: 650; color: #443DA3; background: #E9E7FA; padding: 4px 10px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Блок 2 · Мотиваційне інтерв'ю</div>
+            <svg style="margin-left: auto; flex: none;" width="16" height="16" viewBox="0 0 24 24" fill="#C43D3D"><path d="M4 3h2v18H4zM6 4h11l-3 4 3 4H6z"></path></svg>
+          </div>
+          <!-- Хто / що -->
+          <div style="display: grid; grid-template-columns: 72px 1fr; gap: 6px 12px; padding: 12px 16px; font-size: 15px; line-height: 1.4;">
+            <div style="color: #8A93A0; font-size: 13px; font-weight: 650; padding-top: 1px;">Пацієнт</div>
+            <div style="color: #191D24;">F10.2, ремісія 2 міс, амбулаторно</div>
+            <div style="color: #8A93A0; font-size: 13px; font-weight: 650; padding-top: 1px;">Фокус</div>
+            <div style="color: #191D24;">Амбівалентність щодо тверезості</div>
+          </div>
+          <!-- Метрики -->
+          <div style="padding: 4px 16px 14px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <div style="font-size: 13px; font-weight: 650; color: #14522F; background: #DFF2E7; border: 1px solid #BCE3CD; padding: 4px 10px; border-radius: 999px; font-variant-numeric: tabular-nums;">Співпраця 4</div>
+              <div style="font-size: 13px; font-weight: 650; color: #14522F; background: #DFF2E7; border: 1px solid #BCE3CD; padding: 4px 10px; border-radius: 999px; font-variant-numeric: tabular-nums;">Зворотний зв'язок 3</div>
+              <div style="font-size: 13px; font-weight: 650; color: #5C6470; background: #F3F1EC; border: 1px solid #E3DFD5; padding: 4px 10px; border-radius: 999px; font-variant-numeric: tabular-nums;">Виявлення 2</div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <div style="font-size: 13px; font-weight: 650; color: #14522F; background: #DFF2E7; border: 1px solid #BCE3CD; padding: 4px 10px; border-radius: 999px; font-variant-numeric: tabular-nums;">Р:П 1.4</div>
+              <div style="font-size: 13px; font-weight: 650; color: #14522F; background: #DFF2E7; border: 1px solid #BCE3CD; padding: 4px 10px; border-radius: 999px; font-variant-numeric: tabular-nums;">складні 52%</div>
+              <div style="font-size: 13px; font-weight: 650; color: #7C2626; background: #FADEDE; border: 1px solid #F0C4C4; padding: 4px 10px; border-radius: 999px; font-variant-numeric: tabular-nums;">MI-неузг. 1</div>
+            </div>
+          </div>
+          <!-- Нотатка -->
+          <div style="margin: 0 16px 14px; background: #F5F3EE; border-radius: 12px; padding: 12px 14px;">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #8A93A0; margin-bottom: 4px;">Наступного разу інакше</div>
+            <div style="font-size: 15px; line-height: 1.45; color: #3A414C;">Менше питань підряд — після двох питань давати рефлексію.</div>
+          </div>
+          <!-- Дії -->
+          <div style="display: flex; justify-content: flex-end; padding: 0 16px 14px;">
+            <div style="font-size: 14px; font-weight: 600; color: #C43D3D; padding: 8px 4px; cursor: pointer;">Видалити</div>
+          </div>
+        </div>
+
+        <!-- Другий запис (згорнуто коротший, для ритму стрічки) -->
+        <div style="background: #FFFFFF; border: 1px solid #E3DFD5; border-radius: 16px; overflow: hidden;">
+          <div style="display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid #EEEAE0;">
+            <div style="flex: none; white-space: nowrap; font-size: 16px; font-weight: 750; color: #191D24; font-variant-numeric: tabular-nums;">28 чер 2026</div>
+            <div style="font-size: 12px; font-weight: 650; color: #443DA3; background: #E9E7FA; padding: 4px 10px; border-radius: 999px;">Блок 1 · Концептуалізація</div>
+          </div>
+          <div style="display: grid; grid-template-columns: 72px 1fr; gap: 6px 12px; padding: 12px 16px; font-size: 15px; line-height: 1.4;">
+            <div style="color: #8A93A0; font-size: 13px; font-weight: 650;">Пацієнт</div>
+            <div style="color: #191D24;">F19.2, стаціонар, тиждень 1</div>
+            <div style="color: #8A93A0; font-size: 13px; font-weight: 650;">Фокус</div>
+            <div style="color: #191D24;">Карта тригерів вживання</div>
+          </div>
+          <div style="padding: 0 16px 14px; display: flex; flex-wrap: wrap; gap: 6px;">
+            <div style="font-size: 13px; font-weight: 650; color: #14522F; background: #DFF2E7; border: 1px solid #BCE3CD; padding: 4px 10px; border-radius: 999px;">Концептуалізація 3</div>
+            <div style="font-size: 13px; font-weight: 650; color: #5C6470; background: #F3F1EC; border: 1px solid #E3DFD5; padding: 4px 10px; border-radius: 999px;">Структура 2</div>
+          </div>
+        </div>
+
+        <!-- Таббар -->
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); background: #FFFFFF; border: 1px solid #E3DFD5; border-radius: 16px; padding: 8px 4px; margin-top: 8px;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; color: #8A93A0;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg><span style="font-size: 10px; font-weight: 650;">Головна</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; color: #8A93A0;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z"></path><path d="M4 17h16"></path></svg><span style="font-size: 10px; font-weight: 650;">Курс</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; color: #443DA3;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14v18H5z"></path><path d="M9 8h6M9 12h6M9 16h3"></path></svg><span style="font-size: 10px; font-weight: 700;">Журнал</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; color: #8A93A0;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 10 12l4 4 6-8"></path></svg><span style="font-size: 10px; font-weight: 650;">Динаміка</span></div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; color: #8A93A0;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.4"></circle><circle cx="12" cy="12" r="1.4"></circle><circle cx="19" cy="12" r="1.4"></circle></svg><span style="font-size: 10px; font-weight: 650;">Ще</span></div>
+        </div>
+      </div>
+
+      <!-- Темна -->
+      <div style="width: 375px; background: #15171C; border-radius: 24px; box-shadow: 0 2px 8px rgba(0,0,0,.25), 0 12px 32px rgba(0,0,0,.25); padding: 20px 16px 24px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="font-size: 22px; font-weight: 750; color: #EDEDE6; padding: 0 4px;">Журнал</div>
+        <div style="background: #8B84E8; color: #15171C; border-radius: 14px; min-height: 56px; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; cursor: pointer;">+ Нова сесія</div>
+
+        <div style="background: #1E2128; border: 1px solid #2E323B; border-radius: 16px; overflow: hidden;">
+          <div style="display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid #2A2E36;">
+            <div style="flex: none; white-space: nowrap; font-size: 16px; font-weight: 750; color: #EDEDE6; font-variant-numeric: tabular-nums;">2 лип 2026</div>
+            <div style="font-size: 12px; font-weight: 650; color: #B3ADF2; background: rgba(139,132,232,.16); padding: 4px 10px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Блок 2 · Мотиваційне інтерв'ю</div>
+            <svg style="margin-left: auto; flex: none;" width="16" height="16" viewBox="0 0 24 24" fill="#E06A6A"><path d="M4 3h2v18H4zM6 4h11l-3 4 3 4H6z"></path></svg>
+          </div>
+          <div style="display: grid; grid-template-columns: 72px 1fr; gap: 6px 12px; padding: 12px 16px; font-size: 15px; line-height: 1.4;">
+            <div style="color: #767E8A; font-size: 13px; font-weight: 650;">Пацієнт</div>
+            <div style="color: #EDEDE6;">F10.2, ремісія 2 міс, амбулаторно</div>
+            <div style="color: #767E8A; font-size: 13px; font-weight: 650;">Фокус</div>
+            <div style="color: #EDEDE6;">Амбівалентність щодо тверезості</div>
+          </div>
+          <div style="padding: 4px 16px 14px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <div style="font-size: 13px; font-weight: 650; color: #8ED9AE; background: rgba(60,168,107,.14); border: 1px solid rgba(60,168,107,.35); padding: 4px 10px; border-radius: 999px;">Співпраця 4</div>
+              <div style="font-size: 13px; font-weight: 650; color: #8ED9AE; background: rgba(60,168,107,.14); border: 1px solid rgba(60,168,107,.35); padding: 4px 10px; border-radius: 999px;">Зворотний зв'язок 3</div>
+              <div style="font-size: 13px; font-weight: 650; color: #9AA1AC; background: rgba(154,161,172,.10); border: 1px solid #2E323B; padding: 4px 10px; border-radius: 999px;">Виявлення 2</div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <div style="font-size: 13px; font-weight: 650; color: #8ED9AE; background: rgba(60,168,107,.14); border: 1px solid rgba(60,168,107,.35); padding: 4px 10px; border-radius: 999px;">Р:П 1.4</div>
+              <div style="font-size: 13px; font-weight: 650; color: #8ED9AE; background: rgba(60,168,107,.14); border: 1px solid rgba(60,168,107,.35); padding: 4px 10px; border-radius: 999px;">складні 52%</div>
+              <div style="font-size: 13px; font-weight: 650; color: #F0A0A0; background: rgba(224,106,106,.14); border: 1px solid rgba(224,106,106,.35); padding: 4px 10px; border-radius: 999px;">MI-неузг. 1</div>
+            </div>
+          </div>
+          <div style="margin: 0 16px 14px; background: rgba(255,255,255,.04); border-radius: 12px; padding: 12px 14px;">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #767E8A; margin-bottom: 4px;">Наступного разу інакше</div>
+            <div style="font-size: 15px; line-height: 1.45; color: #C7CBD2;">Менше питань підряд — після двох питань давати рефлексію.</div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; padding: 0 16px 14px;">
+            <div style="font-size: 14px; font-weight: 600; color: #E06A6A; padding: 8px 4px; cursor: pointer;">Видалити</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ 1d: ТОКЕНИ + ТИПОГРАФІКА ============ -->
+  <div id="1d" style="display: flex; flex-direction: column; gap: 16px; max-width: 780px;">
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+      <a href="#1d" style="display: inline-block; background: #191D24; color: #F3F1EC; font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 6px; text-decoration: none;">1d</a>
+      <div style="font-size: 15px; font-weight: 650; color: #191D24;">Токени і типографічна шкала (для реалізації)</div>
+    </div>
+
+    <div style="display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start;">
+      <!-- Палітра -->
+      <div style="width: 375px; background: #FFFFFF; border: 1px solid #E3DFD5; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #8A93A0;">Палітра · світла / темна</div>
+        <div style="display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 13px; font-family: ui-monospace, 'SF Mono', Consolas, monospace;">
+          <div style="display: grid; grid-template-columns: 24px 24px 110px 1fr; gap: 10px; align-items: center;"><div style="width: 24px; height: 24px; border-radius: 6px; background: #F3F1EC; border: 1px solid #E3DFD5;"></div><div style="width: 24px; height: 24px; border-radius: 6px; background: #15171C;"></div><span style="color: #191D24;">--bg</span><span style="color: #8A93A0;">#F3F1EC / #15171C</span></div>
+          <div style="display: grid; grid-template-columns: 24px 24px 110px 1fr; gap: 10px; align-items: center;"><div style="width: 24px; height: 24px; border-radius: 6px; background: #FFFFFF; border: 1px solid #E3DFD5;"></div><div style="width: 24px; height: 24px; border-radius: 6px; background: #1E2128;"></div><span style="color: #191D24;">--card</span><span style="color: #8A93A0;">#FFFFFF / #1E2128</span></div>
+          <div style="display: grid; grid-template-columns: 24px 24px 110px 1fr; gap: 10px; align-items: center;"><div style="width: 24px; height: 24px; border-radius: 6px; background: #191D24;"></div><div style="width: 24px; height: 24px; border-radius: 6px; background: #EDEDE6; border: 1px solid #E3DFD5;"></div><span style="color: #191D24;">--text</span><span style="color: #8A93A0;">#191D24 / #EDEDE6</span></div>
+          <div style="display: grid; grid-template-columns: 24px 24px 110px 1fr; gap: 10px; align-items: center;"><div style="width: 24px; height: 24px; border-radius: 6px; background: #5C6470;"></div><div style="width: 24px; height: 24px; border-radius: 6px; background: #9AA1AC;"></div><span style="color: #191D24;">--muted</span><span style="color: #8A93A0;">#5C6470 / #9AA1AC</span></div>
+          <div style="display: grid; grid-template-columns: 24px 24px 110px 1fr; gap: 10px; align-items: center;"><div style="width: 24px; height: 24px; border-radius: 6px; background: #443DA3;"></div><div style="width: 24px; height: 24px; border-radius: 6px; background: #8B84E8;"></div><span style="color: #191D24;">--accent</span><span style="color: #8A93A0;">#443DA3 / #8B84E8</span></div>
+          <div style="display: grid; grid-template-columns: 24px 24px 110px 1fr; gap: 10px; align-items: center;"><div style="width: 24px; height: 24px; border-radius: 6px; background: #E9E7FA;"></div><div style="width: 24px; height: 24px; border-radius: 6px; background: #2B2A45;"></div><span style="color: #191D24;">--accent-soft</span><span style="color: #8A93A0;">#E9E7FA / rgba(139,132,232,.16)</span></div>
+          <div style="display: grid; grid-template-columns: 24px 24px 110px 1fr; gap: 10px; align-items: center;"><div style="width: 24px; height: 24px; border-radius: 6px; background: #191D24;"></div><div style="width: 24px; height: 24px; border-radius: 6px; background: #0F1115;"></div><span style="color: #191D24;">--ink</span><span style="color: #8A93A0;">#191D24 / #0F1115 · блок питання</span></div>
+          <div style="display: grid; grid-template-columns: 24px 24px 110px 1fr; gap: 10px; align-items: center;"><div style="width: 24px; height: 24px; border-radius: 6px; background: #1E7F4F;"></div><div style="width: 24px; height: 24px; border-radius: 6px; background: #8ED9AE;"></div><span style="color: #191D24;">--ok</span><span style="color: #8A93A0;">#1E7F4F / #8ED9AE</span></div>
+          <div style="display: grid; grid-template-columns: 24px 24px 110px 1fr; gap: 10px; align-items: center;"><div style="width: 24px; height: 24px; border-radius: 6px; background: #DFF2E7;"></div><div style="width: 24px; height: 24px; border-radius: 6px; background: #17301F;"></div><span style="color: #191D24;">--ok-soft</span><span style="color: #8A93A0;">#DFF2E7 / rgba(60,168,107,.14)</span></div>
+          <div style="display: grid; grid-template-columns: 24px 24px 110px 1fr; gap: 10px; align-items: center;"><div style="width: 24px; height: 24px; border-radius: 6px; background: #C43D3D;"></div><div style="width: 24px; height: 24px; border-radius: 6px; background: #E06A6A;"></div><span style="color: #191D24;">--no</span><span style="color: #8A93A0;">#C43D3D / #E06A6A</span></div>
+          <div style="display: grid; grid-template-columns: 24px 24px 110px 1fr; gap: 10px; align-items: center;"><div style="width: 24px; height: 24px; border-radius: 6px; background: #FADEDE;"></div><div style="width: 24px; height: 24px; border-radius: 6px; background: #331A1A;"></div><span style="color: #191D24;">--no-soft</span><span style="color: #8A93A0;">#FADEDE / rgba(224,106,106,.14)</span></div>
+          <div style="display: grid; grid-template-columns: 24px 24px 110px 1fr; gap: 10px; align-items: center;"><div style="width: 24px; height: 24px; border-radius: 6px; background: #FBEFD9;"></div><div style="width: 24px; height: 24px; border-radius: 6px; background: #33291A;"></div><span style="color: #191D24;">--warn-soft</span><span style="color: #8A93A0;">#FBEFD9 / rgba(217,164,65,.14)</span></div>
+          <div style="display: grid; grid-template-columns: 24px 24px 110px 1fr; gap: 10px; align-items: center;"><div style="width: 24px; height: 24px; border-radius: 6px; background: #E3DFD5;"></div><div style="width: 24px; height: 24px; border-radius: 6px; background: #2E323B;"></div><span style="color: #191D24;">--border</span><span style="color: #8A93A0;">#E3DFD5 / #2E323B</span></div>
+        </div>
+        <div style="font-size: 13px; line-height: 1.5; color: #5C6470;">Принцип: теплий паперовий фон замість сіро-блакитного, майже чорний текст, один насичений акцент (ірис) замість нейтрального синього. Радіуси: 14px картки / 16px великі / 999px чипи.</div>
+      </div>
+
+      <!-- Типографіка -->
+      <div style="width: 375px; background: #FFFFFF; border: 1px solid #E3DFD5; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #8A93A0;">Типографічна шкала</div>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div><div style="font-size: 56px; font-weight: 800; color: #191D24; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums;">10 / 12</div><div style="font-size: 12px; color: #8A93A0; margin-top: 4px;">Рахунок результату · 56 / 800 / ls −.02em / tabular-nums</div></div>
+          <div><div style="font-size: 22px; font-weight: 750; color: #191D24;">Заголовок екрана</div><div style="font-size: 12px; color: #8A93A0; margin-top: 2px;">22 / 750</div></div>
+          <div><div style="font-size: 20px; font-weight: 600; color: #191D24; line-height: 1.4;">Питання тесту домінує розміром і вагою</div><div style="font-size: 12px; color: #8A93A0; margin-top: 2px;">20 / 600 / lh 1.4 (вар. А) · Georgia 23 / 400 (вар. Б)</div></div>
+          <div><div style="font-size: 17px; font-weight: 650; color: #191D24;">Заголовок картки / кнопка</div><div style="font-size: 12px; color: #8A93A0; margin-top: 2px;">17 / 650</div></div>
+          <div><div style="font-size: 16px; color: #191D24; line-height: 1.45;">Тіло: варіанти відповіді, текст теорії, значення в журналі</div><div style="font-size: 12px; color: #8A93A0; margin-top: 2px;">16 / 400 / lh 1.45</div></div>
+          <div><div style="font-size: 13px; font-weight: 650; color: #5C6470;">Дрібний: чипи, лічильники, підписи</div><div style="font-size: 12px; color: #8A93A0; margin-top: 2px;">13 / 650</div></div>
+          <div><div style="font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #8A93A0;">Оверлайн секції</div><div style="font-size: 12px; color: #8A93A0; margin-top: 2px;">11 / 700 / caps / ls .08em</div></div>
+        </div>
+        <div style="font-size: 13px; line-height: 1.5; color: #5C6470;">Все — системний стек. Числа скрізь з font-variant-numeric: tabular-nums. Тач-зони ≥56px (кнопки, варіанти відповіді).</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+</x-dc>
+</body>
+</html>

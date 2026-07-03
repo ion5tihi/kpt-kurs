@@ -14,10 +14,11 @@ function todayISO() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
+const MONTHS_UA = ["січ", "лют", "бер", "кві", "тра", "чер", "лип", "сер", "вер", "жов", "лис", "гру"];
 function fmtDate(iso) {
   if (!iso) return "";
   const [y, m, d] = iso.split("-");
-  return `${d}.${m}.${y}`;
+  return `${Number(d)} ${MONTHS_UA[Number(m) - 1] || m} ${y}`;
 }
 function shuffle(arr) {
   const a = arr.slice();
@@ -85,16 +86,27 @@ function mitiEval(m) {
 
 // ── Рендеринг ────────────────────────────────────────────
 
+const TAB_ICONS = {
+  home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>',
+  course: '<path d="M4 4h13a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3V4z"/><path d="M4 17h16"/>',
+  journal: '<path d="M5 3h14v18H5z"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+  stats: '<path d="M4 19 10 12l4 4 6-8"/>',
+  more: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
+};
+function tabIcon(name) {
+  return `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${TAB_ICONS[name]}</svg>`;
+}
+
 function nav(active) {
   const items = [
-    ["#/", "🏠", "Головна"],
-    ["#/blocks", "📚", "Курс"],
-    ["#/journal", "📓", "Журнал"],
-    ["#/stats", "📈", "Динаміка"],
-    ["#/settings", "⚙️", "Ще"],
+    ["#/", "home", "Головна"],
+    ["#/blocks", "course", "Курс"],
+    ["#/journal", "journal", "Журнал"],
+    ["#/stats", "stats", "Динаміка"],
+    ["#/settings", "more", "Ще"],
   ];
   return `<nav class="tabbar">${items.map(([h, ic, t]) =>
-    `<a href="${h}" class="${active === h ? "active" : ""}"><span class="ic">${ic}</span><span>${t}</span></a>`).join("")}</nav>`;
+    `<a href="${h}" class="${active === h ? "active" : ""}">${tabIcon(ic)}<span>${t}</span></a>`).join("")}</nav>`;
 }
 
 function header(title, back) {
@@ -275,32 +287,41 @@ function viewQuiz() {
     qz.shuffled = shuffle(q.options.map((text, idx) => ({ text, idx })));
     qz.shuffledFor = qz.i;
   }
-  const title = qz.blockId === null ? "Повторення" : `Тест — Блок ${qz.blockId}`;
+  const title = qz.blockId === null ? "Повторення" : `Тест · Блок ${qz.blockId}`;
+  const LETTERS = "АБВГДЕ";
+  const iconOk = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+  const iconNo = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
   return `
-  ${header(title, qz.blockId === null ? "#/" : `#/block/${qz.blockId}`)}
+  <header class="top">
+    <a class="back" href="${qz.blockId === null ? "#/" : `#/block/${qz.blockId}`}">‹</a>
+    <span class="quiz-crumb">${esc(title)}</span>
+    <span class="quiz-count">${qz.i + 1} / ${qz.questions.length}</span>
+  </header>
   <main>
-    <p class="muted small center">Питання ${qz.i + 1} з ${qz.questions.length}</p>
     <div class="progress-bar slim"><div style="width:${Math.round(qz.i / qz.questions.length * 100)}%"></div></div>
-    <section class="card">
-      <p class="q-text">${esc(q.q)}</p>
-      <div class="options">
-      ${qz.shuffled.map(o => {
-        let cls = "";
-        if (qz.answered) {
-          if (o.idx === q.correct) cls = "right";
-          else if (o.idx === qz.picked) cls = "wrong";
-          else cls = "dim";
-        }
-        return `<button class="opt ${cls}" data-opt="${o.idx}" ${qz.answered ? "disabled" : ""}>${esc(o.text)}</button>`;
-      }).join("")}
+    <div class="quiz-q">
+      <p class="quiz-q-label">Питання ${qz.i + 1}</p>
+      <p class="quiz-q-text">${esc(q.q)}</p>
+    </div>
+    <div class="options">
+    ${qz.shuffled.map((o, pos) => {
+      let cls = "", key = LETTERS[pos] || pos + 1;
+      if (qz.answered) {
+        if (o.idx === q.correct) { cls = "right"; key = iconOk; }
+        else if (o.idx === qz.picked) { cls = "wrong"; key = iconNo; }
+        else cls = "dim";
+      }
+      return `<button class="opt ${cls}" data-opt="${o.idx}" ${qz.answered ? "disabled" : ""}>
+        <span class="opt-key">${key}</span><span class="opt-text">${esc(o.text)}</span>
+      </button>`;
+    }).join("")}
+    </div>
+    ${qz.answered ? `
+      <div class="expl ${qz.picked === q.correct ? "expl-ok" : "expl-no"}">
+        <p class="expl-label">${qz.picked === q.correct ? "Правильно" : "Неправильно"}</p>
+        <p>${esc(q.expl)}</p>
       </div>
-      ${qz.answered ? `
-        <div class="expl ${qz.picked === q.correct ? "expl-ok" : "expl-no"}">
-          <b>${qz.picked === q.correct ? "Правильно ✅" : "Неправильно"}</b>
-          <p class="small">${esc(q.expl)}</p>
-        </div>
-        <button class="btn primary wide" data-next>Далі</button>` : ""}
-    </section>
+      <button class="btn primary wide" data-next>Далі →</button>` : ""}
   </main>`;
 }
 
@@ -326,22 +347,31 @@ function viewQuizResult() {
     }
     save();
   }
+  const back = qz.blockId === null ? "#/" : `#/block/${qz.blockId}`;
+  let pctLine, note;
+  if (qz.blockId !== null) {
+    pctLine = `<p class="result-pct ${passed ? "ok" : "no"}">${Math.round(pct * 100)}% — ${passed ? "тест складено" : "ще не складено"}</p>`;
+    note = passed
+      ? `Поріг — ${Math.round(PASS * 100)}%.`
+      : `Поріг — ${Math.round(PASS * 100)}%. Питання з помилками потраплять у «Повторення».`;
+  } else {
+    pctLine = `<p class="result-pct ${qz.wrongIds.length ? "no" : "ok"}">${Math.round(pct * 100)}%</p>`;
+    note = qz.wrongIds.length ? "Питання з помилками залишаються в повторенні." : "Усі помилки опрацьовано.";
+  }
   return `
-  ${header("Результат", qz.blockId === null ? "#/" : `#/block/${qz.blockId}`)}
+  <header class="top">
+    <a class="back" href="${back}">‹</a>
+    <span class="quiz-crumb">${qz.blockId === null ? "Повторення" : `Тест · Блок ${qz.blockId}`}</span>
+  </header>
   <main>
-    <section class="card center">
-      <p class="big-num ${passed ? "ok" : ""}">${qz.correct} / ${total}</p>
-      <p>${Math.round(pct * 100)}%</p>
-      ${qz.blockId !== null
-        ? (passed
-          ? `<p class="pass-msg ok">Тест складено ✅</p>`
-          : `<p class="pass-msg">Для складання потрібно ≥${Math.round(PASS * 100)}%. Питання з помилками потраплять у «Повторення».</p>`)
-        : `<p class="pass-msg">${qz.wrongIds.length ? "Питання з помилками залишаються в повторенні." : "Усі помилки опрацьовано ✅"}</p>`}
-      <div class="btn-row">
-        <button class="btn" data-retry>Ще раз</button>
-        <a class="btn primary" href="${qz.blockId === null ? "#/" : `#/block/${qz.blockId}`}">Готово</a>
-      </div>
+    <section class="result-card">
+      <p class="result-overline">Результат</p>
+      <div class="result-score">${qz.correct} / ${total}</div>
+      ${pctLine}
+      <p class="result-note">${note}</p>
     </section>
+    <a class="btn primary wide" href="${back}">Готово</a>
+    <button class="btn ghost wide" data-retry>Ще раз</button>
   </main>`;
 }
 
@@ -350,34 +380,42 @@ function viewQuizResult() {
 function viewJournal() {
   const list = S.sessions.slice().sort((a, b) => b.date.localeCompare(a.date) || (b.id - a.id));
   return `
-  ${header("Журнал сесій")}
+  ${header("Журнал")}
   <main>
     <a class="btn primary wide" href="#/journal/new">+ Нова сесія</a>
-    <p class="muted small">${esc(COURSE.journal.hint)}</p>
+    <p class="journal-hint">${esc(COURSE.journal.hint)}</p>
     ${list.length ? list.map(s => {
       const b = COURSE.blocks.find(x => x.id === s.block);
       const m = mitiEval(s.miti);
+      const flag = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4 3h2v18H4zM6 4h11l-3 4 3 4H6z"/></svg>';
       return `<section class="card session">
         <div class="session-head">
-          <b>${fmtDate(s.date)}</b>
+          <span class="session-date">${fmtDate(s.date)}</span>
           <span class="badge accent">Блок ${s.block}${b ? " · " + esc(b.title) : ""}</span>
+          ${s.redFlag ? `<span class="session-flag" title="Червоний прапорець">${flag}</span>` : ""}
         </div>
-        ${s.patient ? `<p class="small"><b>Пацієнт:</b> ${esc(s.patient)}</p>` : ""}
-        ${s.focus ? `<p class="small"><b>Фокус:</b> ${esc(s.focus)}</p>` : ""}
-        ${Object.keys(s.scores || {}).length ? `<p class="small badges">${Object.entries(s.scores).map(([k, v]) =>
-          `<span class="badge ${v >= 3 ? "ok" : ""}">${esc(CTSR_ITEMS[k] || k)}: ${v}</span>`).join("")}</p>` : ""}
-        ${m ? `<p class="small badges">
+        ${s.patient || s.focus ? `<div class="session-grid">
+          ${s.patient ? `<span class="session-label">Пацієнт</span><span>${esc(s.patient)}</span>` : ""}
+          ${s.focus ? `<span class="session-label">Фокус</span><span>${esc(s.focus)}</span>` : ""}
+        </div>` : ""}
+        ${Object.keys(s.scores || {}).length ? `<div class="session-chips">${Object.entries(s.scores).map(([k, v]) =>
+          `<span class="badge ${v >= 3 ? "ok" : ""}">${esc(CTSR_ITEMS[k] || k)} ${v}</span>`).join("")}</div>` : ""}
+        ${m ? `<div class="session-chips">
           <span class="badge ${m.ratioOk ? "ok" : "no"}">Р:П ${m.ratio === Infinity ? "∞" : m.ratio.toFixed(1)}</span>
           <span class="badge ${m.complexOk ? "ok" : "no"}">складні ${Math.round(m.pctComplex * 100)}%</span>
-          <span class="badge ${m.inconsOk ? "ok" : "no"}">MI-неузг. ${m.incons}</span></p>` : ""}
-        ${s.narco ? `<p class="small badges">
+          <span class="badge ${m.inconsOk ? "ok" : "no"}">MI-неузг. ${m.incons}</span></div>` : ""}
+        ${s.narco ? `<div class="session-chips">
           <span class="badge ${s.narco.craving ? "ok" : ""}">крейвінг/тригери: ${s.narco.craving ? "було" : "не було"}</span>
-          <span class="badge ${s.narco.relapse ? "ok" : ""}">профілактика рецидиву: ${s.narco.relapse ? "було" : "не було"}</span></p>` : ""}
-        ${s.redFlag ? `<p class="small badges"><span class="badge no">🚩 червоний прапорець</span></p>` : ""}
-        ${s.note ? `<p class="small note">💡 ${esc(s.note)}</p>` : ""}
-        <button class="link-btn" data-del-session="${s.id}">Видалити</button>
+          <span class="badge ${s.narco.relapse ? "ok" : ""}">профілактика рецидиву: ${s.narco.relapse ? "було" : "не було"}</span></div>` : ""}
+        ${s.note ? `<div class="session-note">
+          <p class="overline">Наступного разу інакше</p>
+          <p>${esc(s.note)}</p>
+        </div>` : ""}
+        <div class="session-actions">
+          <button class="link-btn" data-del-session="${s.id}">Видалити</button>
+        </div>
       </section>`;
-    }).join("") : `<section class="card center muted"><p>Поки що порожньо.<br>Після першої сесії в тренажері — додайте запис.</p></section>`}
+    }).join("") : `<section class="card center muted session-empty"><p>Поки що порожньо.<br>Після першої сесії в тренажері — додайте запис.</p></section>`}
   </main>
   ${nav("#/journal")}`;
 }
