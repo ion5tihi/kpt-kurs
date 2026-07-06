@@ -8,8 +8,9 @@ const Store = {
       checklist: {},             // { "b<блок>-<індекс>": true } — критерії виходу
       blockDone: {},             // { "<блок>": true } — блок закритий вручну
       sessions: [],              // журнал сесій
-      quizAttempts: {},          // { "<блок>": [{date, score, total, passed}] }
+      quizAttempts: {},          // { "<блок>"|"p<блок>": [{date, score, total, passed}] } — p-ключі: банк Pro
       quizWrong: {},             // { "<питання id>": к-сть помилок } — для повторення
+      quizBank: "base",          // активний банк питань: "base" | "pro"
     };
   },
 

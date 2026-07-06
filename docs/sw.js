@@ -1,5 +1,5 @@
 // Service worker: офлайн-робота через precache. При оновленні версії — новий кеш.
-const VERSION = "v5";
+const VERSION = "v6";
 const CACHE = `kpt-kurs-${VERSION}`;
 const ASSETS = [
   "./",
@@ -9,6 +9,7 @@ const ASSETS = [
   "js/store.js",
   "js/data/course.js",
   "js/data/quiz.js",
+  "js/data/quiz-pro.js",
   "manifest.webmanifest",
   "icons/icon-192.png",
   "icons/icon-512.png",

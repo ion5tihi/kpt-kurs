@@ -2,7 +2,13 @@
 
 let S = Store.load();
 const $app = () => document.getElementById("app");
-const PASS = 0.8; // поріг складання тесту
+const PASS = 0.8;      // поріг складання тесту
+const QUIZ_TAKE = 20;  // питань в одній спробі (якщо банк блоку більший)
+
+// Активний банк питань і ключ прогресу тестів (у Pro прогрес окремий)
+function quizBank() { return S.quizBank === "pro" ? QUIZ_PRO : QUIZ; }
+function attemptKey(blockId) { return S.quizBank === "pro" ? `p${blockId}` : String(blockId); }
+function allQuestions() { return QUIZ.concat(QUIZ_PRO); }
 
 // ── Утиліти ──────────────────────────────────────────────
 
@@ -58,10 +64,10 @@ function blockChecklistDone(b) {
   return b.exit.every((_, i) => S.checklist[`b${b.id}-${i}`]);
 }
 function blockQuizPassed(id) {
-  return (S.quizAttempts[id] || []).some(a => a.passed);
+  return (S.quizAttempts[attemptKey(id)] || []).some(a => a.passed);
 }
 function blockBestQuiz(id) {
-  const at = S.quizAttempts[id] || [];
+  const at = S.quizAttempts[attemptKey(id)] || [];
   if (!at.length) return null;
   return at.reduce((m, a) => (a.score / a.total > m.score / m.total ? a : m));
 }
@@ -242,7 +248,7 @@ function viewBlock(id) {
   const quizPassed = blockQuizPassed(id);
   const checkDone = blockChecklistDone(b);
   const best = blockBestQuiz(id);
-  const qCount = QUIZ.filter(q => q.block === id).length;
+  const qCount = quizBank().filter(q => q.block === id).length;
   return `
   ${header(`Блок ${b.id} · ${b.title}`, "#/blocks")}
   <main>
@@ -276,7 +282,8 @@ function viewBlock(id) {
     <section class="card">
       <p class="overline">Оцінка знань</p>
       <p class="badges">
-        <span class="badge">${qCount} питань</span>
+        ${S.quizBank === "pro" ? `<span class="badge accent">Pro</span>` : ""}
+        <span class="badge">${qCount > QUIZ_TAKE ? `${QUIZ_TAKE} із ${qCount} питань` : `${qCount} питань`}</span>
         <span class="badge">поріг ${Math.round(PASS * 100)}%</span>
         ${best ? `<span class="badge ${quizPassed ? "ok" : ""}">найкращий ${Math.round(best.score / best.total * 100)}%</span>` : ""}
       </p>
@@ -296,13 +303,13 @@ function viewBlock(id) {
 let quizState = null; // { blockId|null(review), questions, i, correct, wrongIds, answered }
 
 function startQuiz(blockId) {
-  const qs = shuffle(QUIZ.filter(q => q.block === blockId));
-  quizState = { blockId, questions: qs, i: 0, correct: 0, wrongIds: [], answered: false };
+  const qs = shuffle(quizBank().filter(q => q.block === blockId)).slice(0, QUIZ_TAKE);
+  quizState = { blockId, bankKey: attemptKey(blockId), questions: qs, i: 0, correct: 0, wrongIds: [], answered: false };
 }
 function startReview() {
   const ids = Object.keys(S.quizWrong);
-  const qs = shuffle(QUIZ.filter(q => ids.includes(q.id)));
-  quizState = { blockId: null, questions: qs, i: 0, correct: 0, wrongIds: [], answered: false };
+  const qs = shuffle(allQuestions().filter(q => ids.includes(q.id)));
+  quizState = { blockId: null, bankKey: null, questions: qs, i: 0, correct: 0, wrongIds: [], answered: false };
 }
 
 function viewQuiz() {
@@ -360,7 +367,8 @@ function viewQuizResult() {
   if (!qz.saved) {
     qz.saved = true;
     if (qz.blockId !== null) {
-      (S.quizAttempts[qz.blockId] = S.quizAttempts[qz.blockId] || []).push({
+      const key = qz.bankKey || String(qz.blockId);
+      (S.quizAttempts[key] = S.quizAttempts[key] || []).push({
         date: todayISO(), score: qz.correct, total, passed,
       });
     }
@@ -590,6 +598,14 @@ function viewSettings() {
         <input type="date" id="start-date" value="${S.startDate || ""}"></label>
       <p class="settings-note">Від неї рахується поточний тиждень курсу на Головній. Темп курсу вільний.</p>
     </section>
+    <section class="card form">
+      <label>Банк питань тестів
+        <select id="quiz-bank">
+          <option value="base" ${S.quizBank !== "pro" ? "selected" : ""}>Базовий — ${QUIZ.length} питань</option>
+          <option value="pro" ${S.quizBank === "pro" ? "selected" : ""}>Pro — ${QUIZ_PRO.length} питань, складніші</option>
+        </select></label>
+      <p class="settings-note">Прогрес тестів для кожного банку окремий. У Pro кожна спроба — випадкові ${QUIZ_TAKE} питань блоку, тож перескладання не повторюється.</p>
+    </section>
     <section class="card">
       <p class="overline">Дані</p>
       <button class="btn ghost wide" id="export-json">Зберегти бекап (JSON)</button>
@@ -765,6 +781,8 @@ function bindEvents(h) {
   // налаштування
   const sd = document.getElementById("start-date");
   if (sd) sd.addEventListener("change", () => { S.startDate = sd.value || null; save(); });
+  const qb = document.getElementById("quiz-bank");
+  if (qb) qb.addEventListener("change", () => { S.quizBank = qb.value; quizState = null; save(); });
   const ej = document.getElementById("export-json");
   if (ej) ej.addEventListener("click", () => download(`kpt-kurs-backup-${todayISO()}.json`, Store.export(S), "application/json"));
   const em = document.getElementById("export-md");
